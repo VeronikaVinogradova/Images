@@ -4,12 +4,12 @@ import React, { useState, useRef, useEffect } from 'react'
 import {
   Bell, User, Info, Moon, Settings, Users, Calendar, 
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
-  Mail, Menu, MoreVertical, Check, ChevronRight
+  Mail, Menu, MoreVertical, Check, CircleHelp
 } from 'lucide-react'
 
 // ─── Sidebar Icons Config ─────────────────────────────
 const sidebarIcons = [
-  { icon: Menu, label: 'Меню', active: true },
+  { icon: Menu, label: 'Меню', active: true, isBurger: true },
   { icon: Users, label: 'Пользователи', active: false },
   { icon: Calendar, label: 'Календарь', active: false },
   { icon: ShoppingCart, label: 'Магазин', active: false },
@@ -17,7 +17,7 @@ const sidebarIcons = [
   { icon: BarChart3, label: 'Аналитика', active: false },
   { icon: Folder, label: 'Файлы', active: false },
   { icon: Phone, label: 'Звонки', active: false },
-  { icon: Settings, label: 'Настройки', active: false, highlight: true },
+  { icon: Settings, label: 'Настройки', active: false, settingsActive: true },
   { icon: HelpCircle, label: 'Справка', active: false },
   { icon: Mail, label: 'Почта', active: false },
 ]
@@ -73,15 +73,18 @@ export default function Home() {
         {sidebarIcons.map((item, idx) => {
           const Icon = item.icon
           const isActive = item.active
-          const isHighlight = item.highlight
+          const isSettingsActive = item.settingsActive
+          const isBurger = item.isBurger
           return (
             <button
               key={idx}
               className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
-                isActive
+                isBurger
+                  ? 'text-gray-900'
+                  : isSettingsActive
+                  ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
+                  : isActive
                   ? 'bg-gray-100 text-gray-900 border-l-[3px] border-gray-900'
-                  : isHighlight
-                  ? 'bg-amber-50 text-gray-700 hover:bg-amber-100'
                   : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
               }`}
               title={item.label}
@@ -216,9 +219,9 @@ export default function Home() {
             {/* Section header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Профиль компании</h2>
-              <button className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1">
+              <button className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5">
                 Как это работает
-                <ChevronRight size={14} />
+                <CircleHelp size={15} strokeWidth={1.8} />
               </button>
             </div>
 
@@ -230,18 +233,17 @@ export default function Home() {
                 <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Данные о компании</h3>
                 
                 <div className="space-y-4">
-                  <div>
-                    <input
-                      type="text"
-                      defaultValue='ООО «Феникс-Инвестстрой»'
-                      className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors"
-                      readOnly
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    defaultValue='ООО «Феникс-Инвестстрой»'
+                    placeholder="Название компании"
+                    className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                    readOnly
+                  />
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-gray-200 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed" disabled>
+                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-70" disabled>
                     Сохранить
                   </button>
                 </div>
@@ -265,15 +267,13 @@ export default function Home() {
                     />
                     <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Контактная почта</label>
-                    <input
-                      type="email"
-                      defaultValue="pasterpanenko@mail.ru"
-                      className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors"
-                      readOnly
-                    />
-                  </div>
+                  <input
+                    type="email"
+                    defaultValue="pasterpanenko@mail.ru"
+                    placeholder="Контактная почта"
+                    className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                    readOnly
+                  />
                   
                   {/* Checkbox */}
                   <div className="flex items-start gap-3 pt-1">
@@ -295,7 +295,7 @@ export default function Home() {
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-gray-200 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed" disabled>
+                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-70" disabled>
                     Сохранить
                   </button>
                 </div>
@@ -306,24 +306,23 @@ export default function Home() {
                 <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
                 
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Почта для получения пароля*</label>
+                  <div className="relative">
                     <input
                       type="email"
                       defaultValue="pasterpanenko@mail.ru"
-                      className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent cursor-default"
+                      placeholder="Почта для получения пароля*"
+                      className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent cursor-default placeholder:text-gray-400"
                       readOnly
                     />
                   </div>
                   
                   <div className="relative">
-                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Личный номер для входа по Mobile ID</label>
                     <input
                       type="text"
-                      placeholder="+7 (___) ___-__-__"
+                      placeholder="Личный номер для входа по Mobile ID"
                       className="w-full h-12 px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
                     />
-                    <Info size={18} className="absolute right-3 top-[38px] text-gray-400" />
+                    <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
 
                   {/* Toggle 2FA */}

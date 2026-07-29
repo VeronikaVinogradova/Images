@@ -151,8 +151,8 @@
   transition: all 0.2s ease;
 }
 .toggle-track.active {
-  background: #3B82F6;
-  border-color: #3B82F6;
+  background: #FACC15;
+  border-color: #EAB308;
 }
 .toggle-thumb {
   width: 20px;
