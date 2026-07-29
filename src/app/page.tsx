@@ -463,7 +463,7 @@ export default function Home() {
 
                   {/* Buttons row */}
                   <div className="flex items-center justify-between pt-1">
-                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">
+                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
                       Изменить пароль
                     </button>
                     <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors cursor-not-allowed opacity-40" disabled>
