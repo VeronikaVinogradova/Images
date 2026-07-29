@@ -79,9 +79,11 @@ export default function Home() {
   const [scenarioStep, setScenarioStep] = useState<'idle' | 'notification-open' | 'settings-page'>('idle')
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [phonePopoverOpen, setPhonePopoverOpen] = useState(false)
+  const [consentPopoverOpen, setConsentPopoverOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const phonePopoverRef = useRef<HTMLDivElement>(null)
+  const consentPopoverRef = useRef<HTMLDivElement>(null)
 
   // Close notifications on outside click
   useEffect(() => {
@@ -120,12 +122,15 @@ export default function Home() {
       if (phonePopoverRef.current && !phonePopoverRef.current.contains(e.target as Node)) {
         setPhonePopoverOpen(false)
       }
+      if (consentPopoverRef.current && !consentPopoverRef.current.contains(e.target as Node)) {
+        setConsentPopoverOpen(false)
+      }
     }
-    if (popoverOpen || phonePopoverOpen) {
+    if (popoverOpen || phonePopoverOpen || consentPopoverOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [popoverOpen, phonePopoverOpen])
+  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen])
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -339,7 +344,7 @@ export default function Home() {
                   />
                   
                   {/* Checkbox */}
-                  <div className="flex items-start gap-3 pt-1">
+                  <div className="flex items-start gap-3 pt-1" ref={consentPopoverRef}>
                     <button
                       onClick={() => setCheckboxConsent(!checkboxConsent)}
                       className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors border ${
@@ -352,8 +357,23 @@ export default function Home() {
                     </button>
                     <span className="text-sm text-gray-700 leading-relaxed">
                       Соглашаюсь на <a href="#" className="text-blue-500 hover:text-blue-600">обработку данных</a> и получение уведомлений
-                      <Info size={14} className="inline ml-1 text-gray-400 align-middle" />
+                      <button
+                        onClick={() => setConsentPopoverOpen(!consentPopoverOpen)}
+                        className={`inline ml-1 align-middle transition-colors ${consentPopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                      >
+                        <Info size={14} />
+                      </button>
                     </span>
+
+                    {/* ─── Popover: Согласие на обработку данных ────────── */}
+                    {consentPopoverOpen && (
+                      <div className="absolute left-0 top-[28px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                        <div className="absolute -top-[6px] left-[16px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                        <p className="text-[13px] leading-[1.5] text-gray-200">
+                          Вы будете получать уведомления об обновлении сервиса, событиях вашей АТС, системные уведомления
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
