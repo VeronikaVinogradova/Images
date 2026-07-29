@@ -78,8 +78,10 @@ export default function Home() {
   const [showNotificationBadge, setShowNotificationBadge] = useState(true)
   const [scenarioStep, setScenarioStep] = useState<'idle' | 'notification-open' | 'settings-page'>('idle')
   const [popoverOpen, setPopoverOpen] = useState(false)
+  const [phonePopoverOpen, setPhonePopoverOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
+  const phonePopoverRef = useRef<HTMLDivElement>(null)
 
   // Close notifications on outside click
   useEffect(() => {
@@ -115,12 +117,15 @@ export default function Home() {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         setPopoverOpen(false)
       }
+      if (phonePopoverRef.current && !phonePopoverRef.current.contains(e.target as Node)) {
+        setPhonePopoverOpen(false)
+      }
     }
-    if (popoverOpen) {
+    if (popoverOpen || phonePopoverOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [popoverOpen])
+  }, [popoverOpen, phonePopoverOpen])
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -302,13 +307,28 @@ export default function Home() {
                     label="Фамилия Имя Отчество*"
                     placeholder="Фамилия Имя Отчество*"
                   />
-                  <div className="relative">
+                  <div className="relative" ref={phonePopoverRef}>
                     <FloatingInput
                       label="Номер телефона *"
                       placeholder="Номер телефона *"
                       rightIcon
                     />
-                    <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <button
+                      onClick={() => setPhonePopoverOpen(!phonePopoverOpen)}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${phonePopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      <Info size={18} />
+                    </button>
+
+                    {/* ─── Popover: Номер телефона ────────── */}
+                    {phonePopoverOpen && (
+                      <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                        <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                        <p className="text-[13px] leading-[1.5] text-gray-200">
+                          Номер не должен содержать буквы и превышать 18 символов (формат +7 XXX XXX-XX-XX для российских номеров). Для международных номеров необходимо ввести код страны после префикса &quot;+&quot;.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <FloatingInput
                     label="Контактная почта"
