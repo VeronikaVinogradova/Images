@@ -1,0 +1,698 @@
+     1→     1→'use client'
+     2→     2→
+     3→     3→import React, { useState, useRef, useEffect, useCallback } from 'react'
+     4→     4→import {
+     5→     5→  Bell, User, Info, Moon, Settings, Users, Calendar, 
+     6→     6→  ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
+     7→     7→  Mail, Menu, MoreVertical, Check, CircleHelp, X
+     8→     8→} from 'lucide-react'
+     9→     9→
+    10→    10→// ─── Phone Mask Helper ─────────────────────────────
+    11→    11→function formatPhoneMask(value: string): string {
+    12→    12→  const digits = value.replace(/\D/g, '').slice(0, 10)
+    13→    13→  if (digits.length === 0) return ''
+    14→    14→  if (digits.length <= 3) return `+7 ${digits}`
+    15→    15→  if (digits.length <= 6) return `+7 ${digits.slice(0,3)} ${digits.slice(3)}`
+    16→    16→  if (digits.length <= 8) return `+7 ${digits.slice(0,3)} ${digits.slice(3,6)}-${digits.slice(6)}`
+    17→    17→  return `+7 ${digits.slice(0,3)} ${digits.slice(3,6)}-${digits.slice(6,8)}-${digits.slice(8)}`
+    18→    18→}
+    19→    19→
+    20→    20→// ─── Floating Label Input ─────────────────────────────
+    21→    21→function FloatingInput({ 
+    22→    22→  label, 
+    23→    23→  value, 
+    24→    24→  onChange,
+    25→    25→  placeholder, 
+    26→    26→  type = 'text',
+    27→    27→  readOnly = false,
+    28→    28→  rightIcon = false,
+    29→    29→  mask,
+    30→    30→}: { 
+    31→    31→  label: string
+    32→    32→  value?: string
+    33→    33→  onChange?: (val: string) => void
+    34→    34→  placeholder?: string
+    35→    35→  type?: string
+    36→    36→  readOnly?: boolean
+    37→    37→  rightIcon?: boolean
+    38→    38→  mask?: 'phone'
+    39→    39→}) {
+    40→    40→  const hasValue = !!value
+    41→    41→  const pr = rightIcon ? 'pr-10' : 'pr-4'
+    42→    42→  
+    43→    43→  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    44→    44→    if (!onChange || readOnly) return
+    45→    45→    let raw = e.target.value
+    46→    46→    if (mask === 'phone') {
+    47→    47→      raw = formatPhoneMask(raw)
+    48→    48→    }
+    49→    49→    onChange(raw)
+    50→    50→  }
+    51→    51→
+    52→    52→  const displayValue = mask === 'phone' && value ? formatPhoneMask(value) : (value || '')
+    53→    53→  
+    54→    54→  return (
+    55→    55→    <div className="relative">
+    56→    56→      <input
+    57→    57→        type={type}
+    58→    58→        value={displayValue}
+    59→    59→        onChange={handleChange}
+    60→    60→        placeholder={hasValue ? ' ' : (placeholder || label)}
+    61→    61→        className={`w-full h-[48px] px-4 ${pr} ${hasValue ? 'pt-[12px]' : ''} bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400 ${readOnly ? 'cursor-default' : ''}`}
+    62→    62→        readOnly={readOnly}
+    63→    63→      />
+    64→    64→      {hasValue && (
+    65→    65→        <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+    66→    66→          {label}
+    67→    67→        </span>
+    68→    68→      )}
+    69→    69→    </div>
+    70→    70→  )
+    71→    71→}
+    72→    72→
+    73→    73→// ─── Sidebar Icons Config ─────────────────────────────
+    74→    74→const sidebarIcons = [
+    75→    75→  { icon: Menu, label: 'Меню', active: true, isBurger: true },
+    76→    76→  { icon: Users, label: 'Пользователи', active: false },
+    77→    77→  { icon: Calendar, label: 'Календарь', active: false },
+    78→    78→  { icon: ShoppingCart, label: 'Магазин', active: false },
+    79→    79→  { icon: Zap, label: 'Быстрые действия', active: false },
+    80→    80→  { icon: BarChart3, label: 'Аналитика', active: false },
+    81→    81→  { icon: Folder, label: 'Файлы', active: false },
+    82→    82→  { icon: Phone, label: 'Звонки', active: false },
+    83→    83→  { icon: Settings, label: 'Настройки', active: false, settingsActive: true },
+    84→    84→  { icon: HelpCircle, label: 'Справка', active: false },
+    85→    85→  { icon: Mail, label: 'Почта', active: false },
+    86→    86→]
+    87→    87→
+    88→    88→// ─── Tab Config ────────────────────────────────────────
+    89→    89→const tabs = [
+    90→    90→  'Профиль компании',
+    91→    91→  'Расписание',
+    92→    92→  'Роли доступа',
+    93→    93→  'Подразделения',
+    94→    94→  'Файлы',
+    95→    95→  'Голосовая почта',
+    96→    96→]
+    97→    97→
+    98→    98→// ─── Main Component ────────────────────────────────────
+    99→    99→export default function Home() {
+   100→   100→  const [activeTab, setActiveTab] = useState(0)
+   101→   101→  const [notificationsOpen, setNotificationsOpen] = useState(false)
+   102→   102→  const [toggle2FA, setToggle2FA] = useState(false)
+   103→   103→  const [checkboxConsent, setCheckboxConsent] = useState(true)
+   104→   104→  const [showNotificationBadge, setShowNotificationBadge] = useState(true)
+   105→   105→  const [scenarioStep, setScenarioStep] = useState<'idle' | 'notification-open' | 'settings-page'>('idle')
+   106→   106→  const [popoverOpen, setPopoverOpen] = useState(false)
+   107→   107→  const [phonePopoverOpen, setPhonePopoverOpen] = useState(false)
+   108→   108→  const [consentPopoverOpen, setConsentPopoverOpen] = useState(false)
+   109→   109→  const [howItWorksOpen, setHowItWorksOpen] = useState(false)
+   110→   110→  const [howItWorksStep, setHowItWorksStep] = useState(0)
+   111→   111→  const notifRef = useRef<HTMLDivElement>(null)
+   112→   112→  const popoverRef = useRef<HTMLDivElement>(null)
+   113→   113→  const phonePopoverRef = useRef<HTMLDivElement>(null)
+   114→   114→  const consentPopoverRef = useRef<HTMLDivElement>(null)
+   115→   115→  const howItWorksRef = useRef<HTMLDivElement>(null)
+   116→   116→
+   117→   117→  // ─── Card field states ────────────────────────────
+   118→   118→  // Card 1
+   119→   119→  const [card1CompanyName, setCard1CompanyName] = useState('ООО «Феникс-Инвестстрой»')
+   120→   120→  const [card1Dirty, setCard1Dirty] = useState(false)
+   121→   121→
+   122→   122→  // Card 2
+   123→   123→  const [card2Fio, setCard2Fio] = useState('')
+   124→   124→  const [card2Phone, setCard2Phone] = useState('')
+   125→   125→  const [card2Email, setCard2Email] = useState('pasterpanenko@mail.ru')
+   126→   126→  const [card2Dirty, setCard2Dirty] = useState(false)
+   127→   127→
+   128→   128→  // Card 3
+   129→   129→  const [card3PasswordEmail, setCard3PasswordEmail] = useState('pasterpanenko@mail.ru')
+   130→   130→  const [card3MobileId, setCard3MobileId] = useState('')
+   131→   131→  const [card3Dirty, setCard3Dirty] = useState(false)
+   132→   132→  const [toggle2FADirty, setToggle2FADirty] = useState(false)
+   133→   133→
+   134→   134→  // ─── Snackbar ──────────────────────────────────
+   135→   135→  const [snackbarOpen, setSnackbarOpen] = useState(false)
+   136→   136→  const showSnackbar = () => {
+   137→   137→    setSnackbarOpen(true)
+   138→   138→    setTimeout(() => setSnackbarOpen(false), 3000)
+   139→   139→  }
+   140→   140→  const handleSave1 = () => { setCard1Dirty(false); showSnackbar() }
+   141→   141→  const handleSave2 = () => { setCard2Dirty(false); showSnackbar() }
+   142→   142→  const handleSave3 = () => { setCard3Dirty(false); setToggle2FADirty(false); showSnackbar() }
+   143→   143→
+   144→   144→  const howItWorksSteps = [
+   145→   145→    {
+   146→   146→      title: 'Настройте профиль компании',
+   147→   147→      text: 'Укажите контактные данные на которые вы хотите получать важные уведомления. В случае возникновения проблем, клиентская поддержка свяжется по указанным контактам',
+   148→   148→    },
+   149→   149→    {
+   150→   150→      title: 'Настройте двухфакторную аутентификацию',
+   151→   151→      paragraphs: [
+   152→   152→        'Указывайте только рабочую почту для сброса пароля.',
+   153→   153→        'Если пароль администратора будет украден, наличие второго фактора затруднит доступ злоумышленникам',
+   154→   154→      ],
+   155→   155→    },
+   156→   156→  ]
+   157→   157→
+   158→   158→  // Close notifications on outside click
+   159→   159→  useEffect(() => {
+   160→   160→    function handleClickOutside(e: MouseEvent) {
+   161→   161→      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+   162→   162→        setNotificationsOpen(false)
+   163→   163→      }
+   164→   164→    }
+   165→   165→    document.addEventListener('mousedown', handleClickOutside)
+   166→   166→    return () => document.removeEventListener('mousedown', handleClickOutside)
+   167→   167→  }, [])
+   168→   168→
+   169→   169→  const handleBellClick = () => {
+   170→   170→    setNotificationsOpen(!notificationsOpen)
+   171→   171→    if (!notificationsOpen) {
+   172→   172→      setScenarioStep('notification-open')
+   173→   173→    }
+   174→   174→  }
+   175→   175→
+   176→   176→  const handleGoToProfile = () => {
+   177→   177→    setNotificationsOpen(false)
+   178→   178→    setScenarioStep('settings-page')
+   179→   179→    setShowNotificationBadge(false)
+   180→   180→  }
+   181→   181→
+   182→   182→  const togglePopover = () => {
+   183→   183→    setPopoverOpen(!popoverOpen)
+   184→   184→  }
+   185→   185→
+   186→   186→  // Close popover on outside click
+   187→   187→  useEffect(() => {
+   188→   188→    function handleClickOutside(e: MouseEvent) {
+   189→   189→      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+   190→   190→        setPopoverOpen(false)
+   191→   191→      }
+   192→   192→      if (phonePopoverRef.current && !phonePopoverRef.current.contains(e.target as Node)) {
+   193→   193→        setPhonePopoverOpen(false)
+   194→   194→      }
+   195→   195→      if (consentPopoverRef.current && !consentPopoverRef.current.contains(e.target as Node)) {
+   196→   196→        setConsentPopoverOpen(false)
+   197→   197→      }
+   198→   198→      if (howItWorksRef.current && !howItWorksRef.current.contains(e.target as Node)) {
+   199→   199→        setHowItWorksOpen(false)
+   200→   200→      }
+   201→   201→    }
+   202→   202→    if (popoverOpen || phonePopoverOpen || consentPopoverOpen || howItWorksOpen) {
+   203→   203→      document.addEventListener('mousedown', handleClickOutside)
+   204→   204→      return () => document.removeEventListener('mousedown', handleClickOutside)
+   205→   205→    }
+   206→   206→  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen, howItWorksOpen])
+   207→   207→
+   208→   208→  // ─── Dirty trackers per card ─────────────────────
+   209→   209→  const markCard1Dirty = useCallback((val: string) => { setCard1CompanyName(val); setCard1Dirty(true) }, [])
+   210→   210→  const markCard2Dirty = useCallback((val: string) => { setCard2Fio(val); setCard2Dirty(true) }, [])
+   211→   211→  const markCard2PhoneDirty = useCallback((val: string) => { setCard2Phone(val); setCard2Dirty(true) }, [])
+   212→   212→  const markCard2EmailDirty = useCallback((val: string) => { setCard2Email(val); setCard2Dirty(true) }, [])
+   213→   213→  const markCard3EmailDirty = useCallback((val: string) => { setCard3PasswordEmail(val); setCard3Dirty(true) }, [])
+   214→   214→  const markCard3MobileIdDirty = useCallback((val: string) => { setCard3MobileId(val); setCard3Dirty(true) }, [])
+   215→   215→  const handleToggle2FA = () => { setToggle2FA(!toggle2FA); setToggle2FADirty(true) }
+   216→   216→
+   217→   217→  const card1CanSave = card1Dirty
+   218→   218→  const card2CanSave = card2Dirty
+   219→   219→  const card3CanSave = card3Dirty || toggle2FADirty
+   220→   220→
+   221→   221→  return (
+   222→   222→    <div className="flex min-h-screen bg-white">
+   223→   223→      {/* ─── Sidebar ─────────────────────────────── */}
+   224→   224→      <aside className="w-[72px] min-h-screen bg-white border-r border-gray-200 flex flex-col items-center py-4 gap-1 shrink-0">
+   225→   225→        {sidebarIcons.map((item, idx) => {
+   226→   226→          const Icon = item.icon
+   227→   227→          const isActive = item.active
+   228→   228→          const isSettingsActive = item.settingsActive
+   229→   229→          const isBurger = item.isBurger
+   230→   230→          return (
+   231→   231→            <button
+   232→   232→              key={idx}
+   233→   233→              className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
+   234→   234→                isBurger
+   235→   235→                  ? 'text-gray-900'
+   236→   236→                  : isSettingsActive
+   237→   237→                  ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
+   238→   238→                  : isActive
+   239→   239→                  ? 'bg-gray-100 text-gray-900 border-l-[3px] border-gray-900'
+   240→   240→                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+   241→   241→              }`}
+   242→   242→              title={item.label}
+   243→   243→            >
+   244→   244→              <Icon size={20} strokeWidth={1.8} />
+   245→   245→            </button>
+   246→   246→          )
+   247→   247→        })}
+   248→   248→      </aside>
+   249→   249→
+   250→   250→      {/* ─── Main Area ──────────────────────────── */}
+   251→   251→      <div className="flex-1 flex flex-col min-h-screen">
+   252→   252→        {/* ─── Header ──────────────────────────── */}
+   253→   253→        <header className="h-16 border-b border-gray-200 flex items-center justify-between px-8 bg-white shrink-0">
+   254→   254→          {/* Logo */}
+   255→   255→          <div className="flex items-center gap-2">
+   256→   256→            <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
+   257→   257→              <span className="text-white text-xs font-bold">Л</span>
+   258→   258→            </div>
+   259→   259→            <span className="text-base font-bold text-gray-900 tracking-tight">логотип</span>
+   260→   260→          </div>
+   261→   261→
+   262→   262→          {/* Right icons */}
+   263→   263→          <div className="flex items-center gap-4">
+   264→   264→            <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+   265→   265→              <Moon size={20} strokeWidth={1.8} />
+   266→   266→            </button>
+   267→   267→
+   268→   268→            {/* Notifications */}
+   269→   269→            <div ref={notifRef} className="relative">
+   270→   270→              <button
+   271→   271→                onClick={handleBellClick}
+   272→   272→                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+   273→   273→                  notificationsOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+   274→   274→                }`}
+   275→   275→              >
+   276→   276→                <Bell size={20} strokeWidth={1.8} />
+   277→   277→                {showNotificationBadge && (
+   278→   278→                  <span className="notification-badge absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
+   279→   279→                )}
+   280→   280→              </button>
+   281→   281→
+   282→   282→              {/* ─── Notifications Dropdown ───────────────── */}
+   283→   283→              {notificationsOpen && (
+   284→   284→                <div className="absolute right-0 top-12 w-[420px] bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+   285→   285→                  <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+   286→   286→                    <h3 className="text-base font-semibold text-gray-900">Уведомления</h3>
+   287→   287→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Прочитать все</button>
+   288→   288→                  </div>
+   289→   289→
+   290→   290→                  <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+   291→   291→                    <div className="flex gap-3">
+   292→   292→                      <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+   293→   293→                        <Users size={20} className="text-green-600" strokeWidth={1.8} />
+   294→   294→                      </div>
+   295→   295→                      <div className="flex-1 min-w-0">
+   296→   296→                        <div className="flex items-start justify-between gap-2">
+   297→   297→                          <h4 className="text-sm font-semibold text-gray-900">Новый функционал</h4>
+   298→   298→                          <button className="text-gray-400 hover:text-gray-600 shrink-0 p-0.5 rounded">
+   299→   299→                            <MoreVertical size={16} />
+   300→   300→                          </button>
+   301→   301→                        </div>
+   302→   302→                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+   303→   303→                          Доступен новый способ входа по Mobile ID. Теперь вы можете заходить в личный кабинет без пароля, подтверждая вход Push-уведомлением на своем телефоне.
+   304→   304→                        </p>
+   305→   305→                        <button
+   306→   306→                          onClick={handleGoToProfile}
+   307→   307→                          className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
+   308→   308→                        >
+   309→   309→                          Перейти в профиль
+   310→   310→                        </button>
+   311→   311→                      </div>
+   312→   312→                    </div>
+   313→   313→                    <div className="absolute left-0 top-0 w-1 h-full bg-blue-500 rounded-r" />
+   314→   314→                  </div>
+   315→   315→
+   316→   316→                  <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+   317→   317→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium w-full text-center">
+   318→   318→                      Все уведомления
+   319→   319→                    </button>
+   320→   320→                  </div>
+   321→   321→                </div>
+   322→   322→              )}
+   323→   323→            </div>
+   324→   324→
+   325→   325→            <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+   326→   326→              <Settings size={20} strokeWidth={1.8} />
+   327→   327→            </button>
+   328→   328→
+   329→   329→            <button className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+   330→   330→              <User size={20} strokeWidth={1.8} />
+   331→   331→            </button>
+   332→   332→          </div>
+   333→   333→        </header>
+   334→   334→
+   335→   335→        {/* ─── Content ──────────────────────────── */}
+   336→   336→        <main className="flex-1 p-8 bg-gray-50/50">
+   337→   337→          <div className="max-w-[1400px] mx-auto">
+   338→   338→            <h1 className="text-2xl font-semibold text-gray-900 mb-8">Настройки АТС</h1>
+   339→   339→
+   340→   340→            {/* ─── Tabs ──────────────────────────── */}
+   341→   341→            <div className="flex gap-8 border-b border-gray-200 mb-8">
+   342→   342→              {tabs.map((tab, idx) => (
+   343→   343→                <button
+   344→   344→                  key={idx}
+   345→   345→                  onClick={() => setActiveTab(idx)}
+   346→   346→                  className={`pb-3 text-sm font-medium transition-colors relative ${
+   347→   347→                    activeTab === idx
+   348→   348→                      ? 'text-gray-900 font-semibold'
+   349→   349→                      : 'text-gray-500 hover:text-gray-700'
+   350→   350→                  }`}
+   351→   351→                >
+   352→   352→                  {tab}
+   353→   353→                  {activeTab === idx && (
+   354→   354→                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400 rounded-full" />
+   355→   355→                  )}
+   356→   356→                </button>
+   357→   357→              ))}
+   358→   358→            </div>
+   359→   359→
+   360→   360→            {/* Section header */}
+   361→   361→            <div className="flex items-center justify-between mb-6">
+   362→   362→              <h2 className="text-lg font-semibold text-gray-900">Профиль компании</h2>
+   363→   363→              <div className="relative" ref={howItWorksRef}>
+   364→   364→                <button
+   365→   365→                  onClick={() => { setHowItWorksOpen(!howItWorksOpen); setHowItWorksStep(0) }}
+   366→   366→                  className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+   367→   367→                >
+   368→   368→                  Как это работает
+   369→   369→                  <CircleHelp size={15} strokeWidth={1.8} />
+   370→   370→                </button>
+   371→   371→
+   372→   372→                {/* ─── Popover: Как это работает (2 slides) ────────── */}
+   373→   373→                {howItWorksOpen && (
+   374→   374→                  <div className="absolute right-0 top-[44px] w-[360px] bg-[#1F1F1F] rounded-lg z-50 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+   375→   375→                    {/* Arrow */}
+   376→   376→                    <div className="absolute -top-[6px] right-[40px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   377→   377→
+   378→   378→                    {/* Header */}
+   379→   379→                    <div className="flex items-center justify-between px-5 pt-5 pb-3">
+   380→   380→                      <h4 className="text-[15px] font-semibold text-white">{howItWorksSteps[howItWorksStep].title}</h4>
+   381→   381→                      <button
+   382→   382→                        onClick={() => setHowItWorksOpen(false)}
+   383→   383→                        className="text-gray-500 hover:text-gray-300 transition-colors"
+   384→   384→                      >
+   385→   385→                        <X size={16} strokeWidth={2} />
+   386→   386→                      </button>
+   387→   387→                    </div>
+   388→   388→
+   389→   389→                    {/* Body */}
+   390→   390→                    <div className="px-5 pb-5">
+   391→   391→                      <div className="overflow-hidden">
+   392→   392→                        <div
+   393→   393→                          className="flex transition-transform duration-300 ease-in-out"
+   394→   394→                          style={{ transform: `translateX(-${howItWorksStep * 100}%)` }}
+   395→   395→                        >
+   396→   396→                          {howItWorksSteps.map((step, idx) => (
+   397→   397→                            <div key={idx} className="w-full shrink-0">
+   398→   398→                              {'text' in step && (
+   399→   399→                                <p className="text-[13px] leading-[1.5] text-gray-400">
+   400→   400→                                  {step.text}
+   401→   401→                                </p>
+   402→   402→                              )}
+   403→   403→                              {'paragraphs' in step && step.paragraphs && (
+   404→   404→                                <>
+   405→   405→                                  {step.paragraphs.map((p, pIdx) => (
+   406→   406→                                    <p key={pIdx} className={`text-[13px] leading-[1.5] text-gray-400 ${pIdx > 0 ? 'mt-3' : ''}`}>
+   407→   407→                                      {p}
+   408→   408→                                    </p>
+   409→   409→                                  ))}
+   410→   410→                                </>
+   411→   411→                              )}
+   412→   412→                            </div>
+   413→   413→                          ))}
+   414→   414→                        </div>
+   415→   415→                      </div>
+   416→   416→
+   417→   417→                      {/* Footer */}
+   418→   418→                      <div className="flex items-center justify-between mt-5">
+   419→   419→                        {/* Dots */}
+   420→   420→                        <div className="flex gap-1.5">
+   421→   421→                          {howItWorksSteps.map((_, idx) => (
+   422→   422→                            <span
+   423→   423→                              key={idx}
+   424→   424→                              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+   425→   425→                                idx === howItWorksStep ? 'bg-white' : 'bg-gray-600'
+   426→   426→                              }`}
+   427→   427→                            />
+   428→   428→                          ))}
+   429→   429→                        </div>
+   430→   430→
+   431→   431→                        {/* Navigation button */}
+   432→   432→                        {howItWorksStep === 0 ? (
+   433→   433→                          <button
+   434→   434→                            onClick={() => setHowItWorksStep(1)}
+   435→   435→                            className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+   436→   436→                          >
+   437→   437→                            Далее
+   438→   438→                          </button>
+   439→   439→                        ) : (
+   440→   440→                          <button
+   441→   441→                            onClick={() => setHowItWorksStep(0)}
+   442→   442→                            className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+   443→   443→                          >
+   444→   444→                            Назад
+   445→   445→                          </button>
+   446→   446→                        )}
+   447→   447→                      </div>
+   448→   448→                    </div>
+   449→   449→                  </div>
+   450→   450→                )}
+   451→   451→              </div>
+   452→   452→            </div>
+   453→   453→
+   454→   454→            {/* ─── 3 Cards Grid ────────────────────── */}
+   455→   455→            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+   456→   456→
+   457→   457→              {/* ─── Card 1: Данные о компании ──── */}
+   458→   458→              <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+   459→   459→                <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Данные о компании</h3>
+   460→   460→                
+   461→   461→                <div className="space-y-4">
+   462→   462→                  <FloatingInput
+   463→   463→                    label="Название компании"
+   464→   464→                    value={card1CompanyName}
+   465→   465→                    onChange={markCard1Dirty}
+   466→   466→                    placeholder="Название компании"
+   467→   467→                  />
+   468→   468→                </div>
+   469→   469→
+   470→   470→                <div className="mt-5 flex justify-end">
+   471→   471→                  <button
+   472→   472→                    className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+   473→   473→                      card1CanSave
+   474→   474→                        ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+   475→   475→                        : 'cursor-not-allowed opacity-40'
+   476→   476→                    }`}
+   477→   477→                    disabled={!card1CanSave}
+   478→   478→                    onClick={handleSave1}
+   479→   479→                  >
+   480→   480→                    Сохранить
+   481→   481→                  </button>
+   482→   482→                </div>
+   483→   483→              </div>
+   484→   484→
+   485→   485→              {/* ─── Card 2: Контактные данные ───── */}
+   486→   486→              <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+   487→   487→                <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Контактные данные</h3>
+   488→   488→                
+   489→   489→                <div className="space-y-4">
+   490→   490→                  <FloatingInput
+   491→   491→                    label="Фамилия Имя Отчество*"
+   492→   492→                    value={card2Fio}
+   493→   493→                    onChange={markCard2Dirty}
+   494→   494→                    placeholder="Фамилия Имя Отчество*"
+   495→   495→                  />
+   496→   496→                  <div className="relative" ref={phonePopoverRef}>
+   497→   497→                    <FloatingInput
+   498→   498→                      label="Номер телефона *"
+   499→   499→                      value={card2Phone}
+   500→   500→                      onChange={markCard2PhoneDirty}
+   501→   501→                      placeholder="Номер телефона *"
+   502→   502→                      rightIcon
+   503→   503→                      mask="phone"
+   504→   504→                    />
+   505→   505→                    <button
+   506→   506→                      onClick={() => setPhonePopoverOpen(!phonePopoverOpen)}
+   507→   507→                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${phonePopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+   508→   508→                    >
+   509→   509→                      <Info size={18} />
+   510→   510→                    </button>
+   511→   511→
+   512→   512→                    {/* ─── Popover: Номер телефона ────────── */}
+   513→   513→                    {phonePopoverOpen && (
+   514→   514→                      <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+   515→   515→                        <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   516→   516→                        <p className="text-[13px] leading-[1.5] text-gray-200">
+   517→   517→                          Номер не должен содержать буквы и превышать 18 символов (формат +7 XXX XXX-XX-XX для российских номеров). Для международных номеров необходимо ввести код страны после префикса &quot;+&quot;.
+   518→   518→                        </p>
+   519→   519→                      </div>
+   520→   520→                    )}
+   521→   521→                  </div>
+   522→   522→                  <FloatingInput
+   523→   523→                    label="Контактная почта"
+   524→   524→                    value={card2Email}
+   525→   525→                    onChange={markCard2EmailDirty}
+   526→   526→                    placeholder="Контактная почта"
+   527→   527→                    type="email"
+   528→   528→                  />
+   529→   529→                  
+   530→   530→                  {/* Checkbox */}
+   531→   531→                  <div className="flex items-start gap-3 pt-1">
+   532→   532→                    <button
+   533→   533→                      onClick={() => { setCheckboxConsent(!checkboxConsent); setCard2Dirty(true) }}
+   534→   534→                      className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors border ${
+   535→   535→                        checkboxConsent
+   536→   536→                          ? 'bg-yellow-300 border-yellow-500'
+   537→   537→                          : 'bg-white border-gray-300'
+   538→   538→                      }`}
+   539→   539→                    >
+   540→   540→                      {checkboxConsent && <Check size={12} className="text-gray-900" strokeWidth={3} />}
+   541→   541→                    </button>
+   542→   542→                    <span className="text-sm text-gray-700 leading-relaxed">
+   543→   543→                      Соглашаюсь на <a href="#" className="text-blue-500 hover:text-blue-600">обработку данных</a> и получение уведомлений
+   544→   544→                      <span className="relative inline-flex ml-1 align-middle" ref={consentPopoverRef}>
+   545→   545→                        <button
+   546→   546→                          onClick={() => setConsentPopoverOpen(!consentPopoverOpen)}
+   547→   547→                          className={`transition-colors ${consentPopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+   548→   548→                        >
+   549→   549→                          <Info size={14} />
+   550→   550→                        </button>
+   551→   551→
+   552→   552→                        {/* ─── Popover: Согласие на обработку данных ────────── */}
+   553→   553→                        {consentPopoverOpen && (
+   554→   554→                          <div className="absolute left-1/2 -translate-x-1/2 top-[22px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+   555→   555→                            <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   556→   556→                            <p className="text-[13px] leading-[1.5] text-gray-200">
+   557→   557→                              Вы будете получать уведомления об обновлении сервиса, событиях вашей АТС, системные уведомления
+   558→   558→                            </p>
+   559→   559→                          </div>
+   560→   560→                        )}
+   561→   561→                      </span>
+   562→   562→                    </span>
+   563→   563→                  </div>
+   564→   564→                </div>
+   565→   565→
+   566→   566→                <div className="mt-5 flex justify-end">
+   567→   567→                  <button
+   568→   568→                    className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+   569→   569→                      card2CanSave
+   570→   570→                        ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+   571→   571→                        : 'cursor-not-allowed opacity-40'
+   572→   572→                    }`}
+   573→   573→                    disabled={!card2CanSave}
+   574→   574→                    onClick={handleSave2}
+   575→   575→                  >
+   576→   576→                    Сохранить
+   577→   577→                  </button>
+   578→   578→                </div>
+   579→   579→              </div>
+   580→   580→
+   581→   581→              {/* ─── Card 3: Права доступа ────────── */}
+   582→   582→              <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+   583→   583→                <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
+   584→   584→                
+   585→   585→                <div className="space-y-4">
+   586→   586→                  <FloatingInput
+   587→   587→                    label="Почта для получения пароля*"
+   588→   588→                    value={card3PasswordEmail}
+   589→   589→                    onChange={markCard3EmailDirty}
+   590→   590→                    placeholder="Почта для получения пароля*"
+   591→   591→                    type="email"
+   592→   592→                  />
+   593→   593→                  
+   594→   594→                  <div className="relative" ref={popoverRef}>
+   595→   595→                    <FloatingInput
+   596→   596→                      label="Личный номер для входа по Mobile ID"
+   597→   597→                      value={card3MobileId}
+   598→   598→                      onChange={markCard3MobileIdDirty}
+   599→   599→                      placeholder="Личный номер для входа по Mobile ID"
+   600→   600→                      rightIcon
+   601→   601→                      mask="phone"
+   602→   602→                    />
+   603→   603→                    <button
+   604→   604→                      onClick={togglePopover}
+   605→   605→                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${popoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+   606→   606→                    >
+   607→   607→                      <Info size={18} />
+   608→   608→                    </button>
+   609→   609→
+   610→   610→                    {/* ─── Popover: Mobile ID ────────── */}
+   611→   611→                    {popoverOpen && (
+   612→   612→                      <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+   613→   613→                        {/* Arrow */}
+   614→   614→                        <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   615→   615→                        
+   616→   616→                        {/* Content */}
+   617→   617→                        <div className="text-[13px] leading-[1.5] text-gray-200">
+   618→   618→                          <p>Mobile ID — это защищённый способ входа по номеру телефона без пароля. Мы отправляем Push-уведомление прямо на ваш телефон.</p>
+   619→   619→                          
+   620→   620→                          <ul className="mt-3 space-y-1 pl-1">
+   621→   621→                            <li className="flex gap-2">
+   622→   622→                              <span className="shrink-0">•</span>
+   623→   623→                              <span>введите свой номер телефона при авторизации</span>
+   624→   624→                            </li>
+   625→   625→                            <li className="flex gap-2">
+   626→   626→                              <span className="shrink-0">•</span>
+   627→   627→                              <span>на телефоне появится Push-уведомление</span>
+   628→   628→                            </li>
+   629→   629→                            <li className="flex gap-2">
+   630→   630→                              <span className="shrink-0">•</span>
+   631→   631→                              <span>для подтверждения нажмите «Разрешить»</span>
+   632→   632→                            </li>
+   633→   633→                          </ul>
+   634→   634→
+   635→   635→                          <p className="mt-3">
+   636→   636→                            Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придет SMS со ссылкой для подтверждения
+   637→   637→                          </p>
+   638→   638→                        </div>
+   639→   639→                      </div>
+   640→   640→                    )}
+   641→   641→                  </div>
+   642→   642→
+   643→   643→                  {/* Toggle 2FA */}
+   644→   644→                  <div className="flex items-start gap-3 pt-2">
+   645→   645→                    <div
+   646→   646→                      onClick={handleToggle2FA}
+   647→   647→                      className={`toggle-track shrink-0 mt-0.5 ${toggle2FA ? 'active' : ''}`}
+   648→   648→                    >
+   649→   649→                      <div className="toggle-thumb" />
+   650→   650→                    </div>
+   651→   651→                    <div>
+   652→   652→                      <p className="text-sm font-medium text-gray-900">Двухфакторная аутентификация</p>
+   653→   653→                      <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+   654→   654→                        Вам будет отправляться проверочный код для входа – это дополнительная защита вашего аккаунта
+   655→   655→                      </p>
+   656→   656→                    </div>
+   657→   657→                  </div>
+   658→   658→
+   659→   659→                  {/* Buttons row */}
+   660→   660→                  <div className="flex items-center justify-between pt-1">
+   661→   661→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+   662→   662→                      Изменить пароль
+   663→   663→                    </button>
+   664→   664→                    <button
+   665→   665→                      className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+   666→   666→                        card3CanSave
+   667→   667→                          ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+   668→   668→                          : 'cursor-not-allowed opacity-40'
+   669→   669→                      }`}
+   670→   670→                      disabled={!card3CanSave}
+   671→   671→                      onClick={handleSave3}
+   672→   672→                    >
+   673→   673→                      Сохранить
+   674→   674→                    </button>
+   675→   675→                  </div>
+   676→   676→                </div>
+   677→   677→              </div>
+   678→   678→            </div>
+   679→   679→          </div>
+   680→   680→        </main>
+   681→   681→      </div>
+   682→   682→
+   683→   683→      {/* ─── Snackbar ──────────────────────────── */}
+   684→   684→      <div
+   685→   685→        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
+   686→   686→          snackbarOpen
+   687→   687→            ? 'opacity-100 translate-y-0'
+   688→   688→            : 'opacity-0 translate-y-4 pointer-events-none'
+   689→   689→        }`}
+   690→   690→      >
+   691→   691→        <div className="bg-[#1F1F1F] text-white text-sm font-medium px-6 py-3 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
+   692→   692→          Изменения сохранены
+   693→   693→        </div>
+   694→   694→      </div>
+   695→   695→    </div>
+   696→   696→  )
+   697→   697→}
+   698→   698→
