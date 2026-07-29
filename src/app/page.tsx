@@ -32,11 +32,11 @@ function FloatingInput({
         type={type}
         defaultValue={value}
         placeholder={hasValue ? ' ' : (placeholder || label)}
-        className={`w-full h-[48px] px-4 ${pr} ${hasValue ? 'pt-[25px]' : ''} bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400 ${readOnly ? 'cursor-default' : ''}`}
+        className={`w-full h-[48px] px-4 ${pr} ${hasValue ? 'pt-[24px]' : ''} bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400 ${readOnly ? 'cursor-default' : ''}`}
         readOnly={readOnly}
       />
       {hasValue && (
-        <span className="absolute left-4 top-[9px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+        <span className="absolute left-4 top-[11px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
           {label}
         </span>
       )}
