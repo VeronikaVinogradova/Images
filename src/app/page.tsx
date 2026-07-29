@@ -7,6 +7,43 @@ import {
   Mail, Menu, MoreVertical, Check, CircleHelp
 } from 'lucide-react'
 
+// ─── Floating Label Input ─────────────────────────────
+function FloatingInput({ 
+  label, 
+  value, 
+  placeholder, 
+  type = 'text',
+  readOnly = false,
+  rightIcon = false,
+}: { 
+  label: string
+  value?: string
+  placeholder?: string
+  type?: string
+  readOnly?: boolean
+  rightIcon?: boolean
+}) {
+  const hasValue = !!value
+  const pr = rightIcon ? 'pr-10' : 'pr-4'
+  
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        defaultValue={value}
+        placeholder={hasValue ? ' ' : (placeholder || label)}
+        className={`w-full h-12 px-4 ${pr} bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400 ${readOnly ? 'cursor-default' : ''}`}
+        readOnly={readOnly}
+      />
+      {hasValue && (
+        <span className="absolute left-4 top-[6px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+          {label}
+        </span>
+      )}
+    </div>
+  )
+}
+
 // ─── Sidebar Icons Config ─────────────────────────────
 const sidebarIcons = [
   { icon: Menu, label: 'Меню', active: true, isBurger: true },
@@ -109,7 +146,6 @@ export default function Home() {
 
           {/* Right icons */}
           <div className="flex items-center gap-4">
-            {/* Theme toggle */}
             <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
               <Moon size={20} strokeWidth={1.8} />
             </button>
@@ -131,21 +167,16 @@ export default function Home() {
               {/* ─── Notifications Dropdown ───────────────── */}
               {notificationsOpen && (
                 <div className="absolute right-0 top-12 w-[420px] bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
-                  {/* Notification header */}
                   <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
                     <h3 className="text-base font-semibold text-gray-900">Уведомления</h3>
                     <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Прочитать все</button>
                   </div>
 
-                  {/* Notification item */}
                   <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
                     <div className="flex gap-3">
-                      {/* Icon */}
                       <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
                         <Users size={20} className="text-green-600" strokeWidth={1.8} />
                       </div>
-                      
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-sm font-semibold text-gray-900">Новый функционал</h4>
@@ -164,11 +195,9 @@ export default function Home() {
                         </button>
                       </div>
                     </div>
-                    {/* Unread indicator */}
                     <div className="absolute left-0 top-0 w-1 h-full bg-blue-500 rounded-r" />
                   </div>
 
-                  {/* Footer */}
                   <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
                     <button className="text-sm text-blue-500 hover:text-blue-600 font-medium w-full text-center">
                       Все уведомления
@@ -178,12 +207,10 @@ export default function Home() {
               )}
             </div>
 
-            {/* Settings */}
             <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
               <Settings size={20} strokeWidth={1.8} />
             </button>
 
-            {/* Profile avatar */}
             <button className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
               <User size={20} strokeWidth={1.8} />
             </button>
@@ -193,7 +220,6 @@ export default function Home() {
         {/* ─── Content ──────────────────────────── */}
         <main className="flex-1 p-8 bg-gray-50/50">
           <div className="max-w-[1400px] mx-auto">
-            {/* Page title */}
             <h1 className="text-2xl font-semibold text-gray-900 mb-8">Настройки АТС</h1>
 
             {/* ─── Tabs ──────────────────────────── */}
@@ -233,17 +259,16 @@ export default function Home() {
                 <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Данные о компании</h3>
                 
                 <div className="space-y-4">
-                  <input
-                    type="text"
-                    defaultValue='ООО «Феникс-Инвестстрой»'
+                  <FloatingInput
+                    label="Название компании"
+                    value='ООО «Феникс-Инвестстрой»'
                     placeholder="Название компании"
-                    className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
                     readOnly
                   />
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-70" disabled>
+                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-40" disabled>
                     Сохранить
                   </button>
                 </div>
@@ -254,24 +279,23 @@ export default function Home() {
                 <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Контактные данные</h3>
                 
                 <div className="space-y-4">
-                  <input
-                    type="text"
+                  <FloatingInput
+                    label="Фамилия Имя Отчество*"
                     placeholder="Фамилия Имя Отчество*"
-                    className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
                   />
                   <div className="relative">
-                    <input
-                      type="text"
+                    <FloatingInput
+                      label="Номер телефона *"
                       placeholder="Номер телефона *"
-                      className="w-full h-12 px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                      rightIcon
                     />
                     <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
-                  <input
-                    type="email"
-                    defaultValue="pasterpanenko@mail.ru"
+                  <FloatingInput
+                    label="Контактная почта"
+                    value="pasterpanenko@mail.ru"
                     placeholder="Контактная почта"
-                    className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                    type="email"
                     readOnly
                   />
                   
@@ -295,7 +319,7 @@ export default function Home() {
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-70" disabled>
+                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-40" disabled>
                     Сохранить
                   </button>
                 </div>
@@ -306,21 +330,19 @@ export default function Home() {
                 <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
                 
                 <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="email"
-                      defaultValue="pasterpanenko@mail.ru"
-                      placeholder="Почта для получения пароля*"
-                      className="w-full h-12 px-4 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent cursor-default placeholder:text-gray-400"
-                      readOnly
-                    />
-                  </div>
+                  <FloatingInput
+                    label="Почта для получения пароля*"
+                    value="pasterpanenko@mail.ru"
+                    placeholder="Почта для получения пароля*"
+                    type="email"
+                    readOnly
+                  />
                   
                   <div className="relative">
-                    <input
-                      type="text"
+                    <FloatingInput
+                      label="Личный номер для входа по Mobile ID"
                       placeholder="Личный номер для входа по Mobile ID"
-                      className="w-full h-12 px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                      rightIcon
                     />
                     <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -346,7 +368,7 @@ export default function Home() {
                     <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">
                       Изменить пароль
                     </button>
-                    <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors cursor-not-allowed opacity-70" disabled>
+                    <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors cursor-not-allowed opacity-40" disabled>
                       Сохранить
                     </button>
                   </div>
