@@ -95,7 +95,6 @@ export default function Home() {
     },
     {
       title: 'Настройте двухфакторную аутентификацию',
-      hasDiagram: true,
       paragraphs: [
         'Указывайте только рабочую почту для сброса пароля.',
         'Если пароль администратора будет украден, наличие второго фактора затруднит доступ злоумышленникам',
@@ -335,61 +334,8 @@ export default function Home() {
                                   {step.text}
                                 </p>
                               )}
-                              {'hasDiagram' in step && step.hasDiagram && (
+                              {'paragraphs' in step && step.paragraphs && (
                                 <>
-                                  {/* Diagram area */}
-                                  <div className="bg-white rounded-lg p-4 mb-4 mt-1">
-                                    {/* Flowchart */}
-                                    <div className="flex flex-col items-center gap-3">
-                                      {/* Password node */}
-                                      <div className="bg-gray-100 rounded-lg px-5 py-2 text-sm font-medium text-gray-700">
-                                        Пароль
-                                      </div>
-                                      {/* Connector lines */}
-                                      <div className="flex items-start gap-16">
-                                        {/* Left branch (wrong) */}
-                                        <div className="flex flex-col items-center gap-2">
-                                          <div className="w-px h-4 bg-gray-300" />
-                                          <div className="flex flex-col items-center gap-2">
-                                            <div className="flex items-center gap-1.5">
-                                              <span className="w-2 h-2 rounded-full bg-red-400" />
-                                              <span className="text-xs text-red-500 font-medium">Неверный</span>
-                                            </div>
-                                            <div className="w-px h-3 bg-gray-300" />
-                                            <div className="bg-red-50 border border-red-200 rounded px-3 py-1.5 text-xs text-red-600">
-                                              Нет доступа
-                                            </div>
-                                          </div>
-                                        </div>
-                                        {/* Right branch (correct) */}
-                                        <div className="flex flex-col items-center gap-2">
-                                          <div className="w-px h-4 bg-gray-300" />
-                                          <div className="flex flex-col items-center gap-2">
-                                            <div className="flex items-center gap-1.5">
-                                              <span className="w-2 h-2 rounded-full bg-green-400" />
-                                              <span className="text-xs text-green-600 font-medium">Верный</span>
-                                            </div>
-                                            <div className="w-px h-3 bg-gray-300" />
-                                            <div className="bg-gray-100 rounded px-3 py-1.5 text-xs text-gray-700">
-                                              Одноразовый код
-                                            </div>
-                                            <div className="w-px h-3 bg-gray-300" />
-                                            <div className="flex flex-col items-center gap-2">
-                                              <div className="flex items-center gap-1.5">
-                                                <span className="w-2 h-2 rounded-full bg-green-400" />
-                                                <span className="text-xs text-green-600 font-medium">Верный</span>
-                                              </div>
-                                              <div className="w-px h-3 bg-gray-300" />
-                                              <div className="bg-green-50 border border-green-200 rounded px-3 py-1.5 text-xs text-green-600 font-medium">
-                                                Авторизация
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  {/* Paragraphs */}
                                   {step.paragraphs.map((p, pIdx) => (
                                     <p key={pIdx} className={`text-[13px] leading-[1.5] text-gray-400 ${pIdx > 0 ? 'mt-3' : ''}`}>
                                       {p}
