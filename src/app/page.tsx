@@ -36,7 +36,7 @@ function FloatingInput({
         readOnly={readOnly}
       />
       {hasValue && (
-        <span className="absolute left-4 top-[12px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+        <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
           {label}
         </span>
       )}
