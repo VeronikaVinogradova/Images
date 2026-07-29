@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import {
   Bell, User, Info, Moon, Settings, Users, Calendar, 
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
-  Mail, Menu, MoreVertical, Check, CircleHelp
+  Mail, Menu, MoreVertical, Check, CircleHelp, X
 } from 'lucide-react'
 
 // ─── Floating Label Input ─────────────────────────────
@@ -80,10 +80,28 @@ export default function Home() {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [phonePopoverOpen, setPhonePopoverOpen] = useState(false)
   const [consentPopoverOpen, setConsentPopoverOpen] = useState(false)
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false)
+  const [howItWorksStep, setHowItWorksStep] = useState(0)
   const notifRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const phonePopoverRef = useRef<HTMLDivElement>(null)
   const consentPopoverRef = useRef<HTMLDivElement>(null)
+  const howItWorksRef = useRef<HTMLDivElement>(null)
+
+  const howItWorksSteps = [
+    {
+      title: 'Настройте профиль компании',
+      text: 'Укажите контактные данные на которые вы хотите получать важные уведомления. В случае возникновения проблем, клиентская поддержка свяжется по указанным контактам',
+    },
+    {
+      title: 'Добавьте номер для Mobile ID',
+      text: 'Введите личный номер телефона для входа по Mobile ID — это безопасный способ авторизации без пароля через Push-уведомление на вашем телефоне.',
+    },
+    {
+      title: 'Включите двухфакторную аутентификацию',
+      text: 'Дополнительная защита аккаунта: при каждом входе вам будет отправляться проверочный код. Рекомендуем использовать этот метод для повышения безопасности.',
+    },
+  ]
 
   // Close notifications on outside click
   useEffect(() => {
@@ -125,12 +143,15 @@ export default function Home() {
       if (consentPopoverRef.current && !consentPopoverRef.current.contains(e.target as Node)) {
         setConsentPopoverOpen(false)
       }
+      if (howItWorksRef.current && !howItWorksRef.current.contains(e.target as Node)) {
+        setHowItWorksOpen(false)
+      }
     }
-    if (popoverOpen || phonePopoverOpen || consentPopoverOpen) {
+    if (popoverOpen || phonePopoverOpen || consentPopoverOpen || howItWorksOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen])
+  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen, howItWorksOpen])
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -274,10 +295,84 @@ export default function Home() {
             {/* Section header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Профиль компании</h2>
-              <button className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
-                Как это работает
-                <CircleHelp size={15} strokeWidth={1.8} className="transition-colors duration-200 group-hover:text-blue-600" />
-              </button>
+              <div className="relative" ref={howItWorksRef}>
+                <button
+                  onClick={() => { setHowItWorksOpen(!howItWorksOpen); setHowItWorksStep(0) }}
+                  className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+                >
+                  Как это работает
+                  <CircleHelp size={15} strokeWidth={1.8} />
+                </button>
+
+                {/* ─── Popover: Как это работает (multi-step) ────────── */}
+                {howItWorksOpen && (
+                  <div className="absolute right-0 top-[44px] w-[360px] bg-[#1F1F1F] rounded-lg z-50 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                    {/* Arrow */}
+                    <div className="absolute -top-[6px] right-[40px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                      <h4 className="text-[15px] font-semibold text-white">{howItWorksSteps[howItWorksStep].title}</h4>
+                      <button
+                        onClick={() => setHowItWorksOpen(false)}
+                        className="text-gray-500 hover:text-gray-300 transition-colors"
+                      >
+                        <X size={16} strokeWidth={2} />
+                      </button>
+                    </div>
+
+                    {/* Body */}
+                    <div className="px-5 pb-5">
+                      <div className="overflow-hidden">
+                        <div
+                          className="flex transition-transform duration-300 ease-in-out"
+                          style={{ transform: `translateX(-${howItWorksStep * 100}%)` }}
+                        >
+                          {howItWorksSteps.map((step, idx) => (
+                            <div key={idx} className="w-full shrink-0">
+                              <p className="text-[13px] leading-[1.5] text-gray-400">
+                                {step.text}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between mt-5">
+                        {/* Dots */}
+                        <div className="flex gap-1.5">
+                          {howItWorksSteps.map((_, idx) => (
+                            <span
+                              key={idx}
+                              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                                idx === howItWorksStep ? 'bg-white' : 'bg-gray-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Next button */}
+                        {howItWorksStep < howItWorksSteps.length - 1 ? (
+                          <button
+                            onClick={() => setHowItWorksStep(howItWorksStep + 1)}
+                            className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                          >
+                            Далее
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setHowItWorksOpen(false)}
+                            className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                          >
+                            Готово
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* ─── 3 Cards Grid ────────────────────── */}
