@@ -1,36 +1,67 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Bell, User, Info, Moon, Settings, Users, Calendar, 
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
   Mail, Menu, MoreVertical, Check, CircleHelp, X
 } from 'lucide-react'
 
+// ─── Phone Mask Helper ─────────────────────────────
+function formatPhoneMask(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length === 0) return ''
+  if (digits[0] !== '7' && digits[0] !== '8') {
+    return '+' + digits.slice(0, 15)
+  }
+  const d = digits
+  if (d.length <= 1) return `+${d}`
+  if (d.length <= 4) return `+${d[0]} (${d.slice(1)}`
+  if (d.length <= 7) return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4)}`
+  if (d.length <= 9) return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`
+  return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7,9)}-${d.slice(9)}`
+}
+
 // ─── Floating Label Input ─────────────────────────────
 function FloatingInput({ 
   label, 
   value, 
+  onChange,
   placeholder, 
   type = 'text',
   readOnly = false,
   rightIcon = false,
+  mask,
 }: { 
   label: string
   value?: string
+  onChange?: (val: string) => void
   placeholder?: string
   type?: string
   readOnly?: boolean
   rightIcon?: boolean
+  mask?: 'phone'
 }) {
   const hasValue = !!value
   const pr = rightIcon ? 'pr-10' : 'pr-4'
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!onChange || readOnly) return
+    let raw = e.target.value
+    if (mask === 'phone') {
+      raw = formatPhoneMask(raw)
+    }
+    onChange(raw)
+  }
+
+  const displayValue = mask === 'phone' && value ? formatPhoneMask(value) : (value || '')
   
   return (
     <div className="relative">
       <input
         type={type}
-        defaultValue={value}
+        value={displayValue}
+        onChange={handleChange}
         placeholder={hasValue ? ' ' : (placeholder || label)}
         className={`w-full h-[48px] px-4 ${pr} ${hasValue ? 'pt-[12px]' : ''} bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400 ${readOnly ? 'cursor-default' : ''}`}
         readOnly={readOnly}
@@ -87,6 +118,23 @@ export default function Home() {
   const phonePopoverRef = useRef<HTMLDivElement>(null)
   const consentPopoverRef = useRef<HTMLDivElement>(null)
   const howItWorksRef = useRef<HTMLDivElement>(null)
+
+  // ─── Card field states ────────────────────────────
+  // Card 1
+  const [card1CompanyName, setCard1CompanyName] = useState('ООО «Феникс-Инвестстрой»')
+  const [card1Dirty, setCard1Dirty] = useState(false)
+
+  // Card 2
+  const [card2Fio, setCard2Fio] = useState('')
+  const [card2Phone, setCard2Phone] = useState('')
+  const [card2Email, setCard2Email] = useState('pasterpanenko@mail.ru')
+  const [card2Dirty, setCard2Dirty] = useState(false)
+
+  // Card 3
+  const [card3PasswordEmail, setCard3PasswordEmail] = useState('pasterpanenko@mail.ru')
+  const [card3MobileId, setCard3MobileId] = useState('')
+  const [card3Dirty, setCard3Dirty] = useState(false)
+  const [toggle2FADirty, setToggle2FADirty] = useState(false)
 
   const howItWorksSteps = [
     {
@@ -151,6 +199,19 @@ export default function Home() {
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [popoverOpen, phonePopoverOpen, consentPopoverOpen, howItWorksOpen])
+
+  // ─── Dirty trackers per card ─────────────────────
+  const markCard1Dirty = useCallback((val: string) => { setCard1CompanyName(val); setCard1Dirty(true) }, [])
+  const markCard2Dirty = useCallback((val: string) => { setCard2Fio(val); setCard2Dirty(true) }, [])
+  const markCard2PhoneDirty = useCallback((val: string) => { setCard2Phone(val); setCard2Dirty(true) }, [])
+  const markCard2EmailDirty = useCallback((val: string) => { setCard2Email(val); setCard2Dirty(true) }, [])
+  const markCard3EmailDirty = useCallback((val: string) => { setCard3PasswordEmail(val); setCard3Dirty(true) }, [])
+  const markCard3MobileIdDirty = useCallback((val: string) => { setCard3MobileId(val); setCard3Dirty(true) }, [])
+  const handleToggle2FA = () => { setToggle2FA(!toggle2FA); setToggle2FADirty(true) }
+
+  const card1CanSave = card1Dirty
+  const card2CanSave = card2Dirty
+  const card3CanSave = card3Dirty || toggle2FADirty
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -303,7 +364,7 @@ export default function Home() {
                   <CircleHelp size={15} strokeWidth={1.8} />
                 </button>
 
-                {/* ─── Popover: Как это работает (multi-step) ────────── */}
+                {/* ─── Popover: Как это работает (2 slides) ────────── */}
                 {howItWorksOpen && (
                   <div className="absolute right-0 top-[44px] w-[360px] bg-[#1F1F1F] rounded-lg z-50 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
                     {/* Arrow */}
@@ -395,14 +456,21 @@ export default function Home() {
                 <div className="space-y-4">
                   <FloatingInput
                     label="Название компании"
-                    value='ООО «Феникс-Инвестстрой»'
+                    value={card1CompanyName}
+                    onChange={markCard1Dirty}
                     placeholder="Название компании"
-                    readOnly
                   />
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-40" disabled>
+                  <button
+                    className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+                      card1CanSave
+                        ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+                        : 'cursor-not-allowed opacity-40'
+                    }`}
+                    disabled={!card1CanSave}
+                  >
                     Сохранить
                   </button>
                 </div>
@@ -415,13 +483,18 @@ export default function Home() {
                 <div className="space-y-4">
                   <FloatingInput
                     label="Фамилия Имя Отчество*"
+                    value={card2Fio}
+                    onChange={markCard2Dirty}
                     placeholder="Фамилия Имя Отчество*"
                   />
                   <div className="relative" ref={phonePopoverRef}>
                     <FloatingInput
                       label="Номер телефона *"
-                      placeholder="Номер телефона *"
+                      value={card2Phone}
+                      onChange={markCard2PhoneDirty}
+                      placeholder="+7 (___) ___-__-__"
                       rightIcon
+                      mask="phone"
                     />
                     <button
                       onClick={() => setPhonePopoverOpen(!phonePopoverOpen)}
@@ -442,16 +515,16 @@ export default function Home() {
                   </div>
                   <FloatingInput
                     label="Контактная почта"
-                    value="pasterpanenko@mail.ru"
+                    value={card2Email}
+                    onChange={markCard2EmailDirty}
                     placeholder="Контактная почта"
                     type="email"
-                    readOnly
                   />
                   
                   {/* Checkbox */}
                   <div className="flex items-start gap-3 pt-1">
                     <button
-                      onClick={() => setCheckboxConsent(!checkboxConsent)}
+                      onClick={() => { setCheckboxConsent(!checkboxConsent); setCard2Dirty(true) }}
                       className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors border ${
                         checkboxConsent
                           ? 'bg-yellow-300 border-yellow-500'
@@ -485,7 +558,14 @@ export default function Home() {
                 </div>
 
                 <div className="mt-5 flex justify-end">
-                  <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg cursor-not-allowed opacity-40" disabled>
+                  <button
+                    className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+                      card2CanSave
+                        ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+                        : 'cursor-not-allowed opacity-40'
+                    }`}
+                    disabled={!card2CanSave}
+                  >
                     Сохранить
                   </button>
                 </div>
@@ -498,17 +578,20 @@ export default function Home() {
                 <div className="space-y-4">
                   <FloatingInput
                     label="Почта для получения пароля*"
-                    value="pasterpanenko@mail.ru"
+                    value={card3PasswordEmail}
+                    onChange={markCard3EmailDirty}
                     placeholder="Почта для получения пароля*"
                     type="email"
-                    readOnly
                   />
                   
                   <div className="relative" ref={popoverRef}>
                     <FloatingInput
                       label="Личный номер для входа по Mobile ID"
+                      value={card3MobileId}
+                      onChange={markCard3MobileIdDirty}
                       placeholder="Личный номер для входа по Mobile ID"
                       rightIcon
+                      mask="phone"
                     />
                     <button
                       onClick={togglePopover}
@@ -553,7 +636,7 @@ export default function Home() {
                   {/* Toggle 2FA */}
                   <div className="flex items-start gap-3 pt-2">
                     <div
-                      onClick={() => setToggle2FA(!toggle2FA)}
+                      onClick={handleToggle2FA}
                       className={`toggle-track shrink-0 mt-0.5 ${toggle2FA ? 'active' : ''}`}
                     >
                       <div className="toggle-thumb" />
@@ -571,7 +654,14 @@ export default function Home() {
                     <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
                       Изменить пароль
                     </button>
-                    <button className="px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors cursor-not-allowed opacity-40" disabled>
+                    <button
+                      className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+                        card3CanSave
+                          ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+                          : 'cursor-not-allowed opacity-40'
+                      }`}
+                      disabled={!card3CanSave}
+                    >
                       Сохранить
                     </button>
                   </div>
