@@ -274,9 +274,9 @@ export default function Home() {
             {/* Section header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Профиль компании</h2>
-              <button className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5">
+              <button className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
                 Как это работает
-                <CircleHelp size={15} strokeWidth={1.8} />
+                <CircleHelp size={15} strokeWidth={1.8} className="transition-colors duration-200 group-hover:text-blue-600" />
               </button>
             </div>
 
