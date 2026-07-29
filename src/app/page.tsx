@@ -77,7 +77,9 @@ export default function Home() {
   const [checkboxConsent, setCheckboxConsent] = useState(true)
   const [showNotificationBadge, setShowNotificationBadge] = useState(true)
   const [scenarioStep, setScenarioStep] = useState<'idle' | 'notification-open' | 'settings-page'>('idle')
+  const [popoverOpen, setPopoverOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
 
   // Close notifications on outside click
   useEffect(() => {
@@ -102,6 +104,23 @@ export default function Home() {
     setScenarioStep('settings-page')
     setShowNotificationBadge(false)
   }
+
+  const togglePopover = () => {
+    setPopoverOpen(!popoverOpen)
+  }
+
+  // Close popover on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setPopoverOpen(false)
+      }
+    }
+    if (popoverOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [popoverOpen])
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -338,13 +357,50 @@ export default function Home() {
                     readOnly
                   />
                   
-                  <div className="relative">
+                  <div className="relative" ref={popoverRef}>
                     <FloatingInput
                       label="Личный номер для входа по Mobile ID"
                       placeholder="Личный номер для входа по Mobile ID"
                       rightIcon
                     />
-                    <Info size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <button
+                      onClick={togglePopover}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${popoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      <Info size={18} />
+                    </button>
+
+                    {/* ─── Popover: Mobile ID ────────── */}
+                    {popoverOpen && (
+                      <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                        {/* Arrow */}
+                        <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                        
+                        {/* Content */}
+                        <div className="text-[13px] leading-[1.5] text-gray-200">
+                          <p>Mobile ID — это защищённый способ входа по номеру телефона без пароля. Мы отправляем Push-уведомление прямо на ваш телефон.</p>
+                          
+                          <ul className="mt-3 space-y-1 pl-1">
+                            <li className="flex gap-2">
+                              <span className="shrink-0">•</span>
+                              <span>введите свой номер телефона при авторизации</span>
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="shrink-0">•</span>
+                              <span>на телефоне появится Push-уведомление</span>
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="shrink-0">•</span>
+                              <span>для подтверждения нажмите «Разрешить»</span>
+                            </li>
+                          </ul>
+
+                          <p className="mt-3">
+                            Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придет SMS со ссылкой для подтверждения
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Toggle 2FA */}
