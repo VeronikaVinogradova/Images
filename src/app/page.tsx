@@ -344,7 +344,7 @@ export default function Home() {
                   />
                   
                   {/* Checkbox */}
-                  <div className="flex items-start gap-3 pt-1" ref={consentPopoverRef}>
+                  <div className="flex items-start gap-3 pt-1">
                     <button
                       onClick={() => setCheckboxConsent(!checkboxConsent)}
                       className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors border ${
@@ -357,23 +357,25 @@ export default function Home() {
                     </button>
                     <span className="text-sm text-gray-700 leading-relaxed">
                       Соглашаюсь на <a href="#" className="text-blue-500 hover:text-blue-600">обработку данных</a> и получение уведомлений
-                      <button
-                        onClick={() => setConsentPopoverOpen(!consentPopoverOpen)}
-                        className={`inline ml-1 align-middle transition-colors ${consentPopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
-                      >
-                        <Info size={14} />
-                      </button>
-                    </span>
+                      <span className="relative inline-flex ml-1 align-middle" ref={consentPopoverRef}>
+                        <button
+                          onClick={() => setConsentPopoverOpen(!consentPopoverOpen)}
+                          className={`transition-colors ${consentPopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                          <Info size={14} />
+                        </button>
 
-                    {/* ─── Popover: Согласие на обработку данных ────────── */}
-                    {consentPopoverOpen && (
-                      <div className="absolute left-0 top-[28px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
-                        <div className="absolute -top-[6px] left-[16px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
-                        <p className="text-[13px] leading-[1.5] text-gray-200">
-                          Вы будете получать уведомления об обновлении сервиса, событиях вашей АТС, системные уведомления
-                        </p>
-                      </div>
-                    )}
+                        {/* ─── Popover: Согласие на обработку данных ────────── */}
+                        {consentPopoverOpen && (
+                          <div className="absolute left-1/2 -translate-x-1/2 top-[22px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                            <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                            <p className="text-[13px] leading-[1.5] text-gray-200">
+                              Вы будете получать уведомления об обновлении сервиса, событиях вашей АТС, системные уведомления
+                            </p>
+                          </div>
+                        )}
+                      </span>
+                    </span>
                   </div>
                 </div>
 
