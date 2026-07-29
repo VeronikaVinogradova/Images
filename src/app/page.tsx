@@ -131,6 +131,16 @@ export default function Home() {
   const [card3Dirty, setCard3Dirty] = useState(false)
   const [toggle2FADirty, setToggle2FADirty] = useState(false)
 
+  // ─── Snackbar ──────────────────────────────────
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const showSnackbar = () => {
+    setSnackbarOpen(true)
+    setTimeout(() => setSnackbarOpen(false), 3000)
+  }
+  const handleSave1 = () => { setCard1Dirty(false); showSnackbar() }
+  const handleSave2 = () => { setCard2Dirty(false); showSnackbar() }
+  const handleSave3 = () => { setCard3Dirty(false); setToggle2FADirty(false); showSnackbar() }
+
   const howItWorksSteps = [
     {
       title: 'Настройте профиль компании',
@@ -465,6 +475,7 @@ export default function Home() {
                         : 'cursor-not-allowed opacity-40'
                     }`}
                     disabled={!card1CanSave}
+                    onClick={handleSave1}
                   >
                     Сохранить
                   </button>
@@ -560,6 +571,7 @@ export default function Home() {
                         : 'cursor-not-allowed opacity-40'
                     }`}
                     disabled={!card2CanSave}
+                    onClick={handleSave2}
                   >
                     Сохранить
                   </button>
@@ -656,6 +668,7 @@ export default function Home() {
                           : 'cursor-not-allowed opacity-40'
                       }`}
                       disabled={!card3CanSave}
+                      onClick={handleSave3}
                     >
                       Сохранить
                     </button>
@@ -665,6 +678,19 @@ export default function Home() {
             </div>
           </div>
         </main>
+      </div>
+
+      {/* ─── Snackbar ──────────────────────────── */}
+      <div
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
+          snackbarOpen
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="bg-[#1F1F1F] text-white text-sm font-medium px-6 py-3 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
+          Изменения сохранены
+        </div>
       </div>
     </div>
   )
