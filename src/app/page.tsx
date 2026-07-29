@@ -9,17 +9,12 @@ import {
 
 // ─── Phone Mask Helper ─────────────────────────────
 function formatPhoneMask(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 11)
+  const digits = value.replace(/\D/g, '').slice(0, 10)
   if (digits.length === 0) return ''
-  if (digits[0] !== '7' && digits[0] !== '8') {
-    return '+' + digits.slice(0, 15)
-  }
-  const d = digits
-  if (d.length <= 1) return `+${d}`
-  if (d.length <= 4) return `+${d[0]} (${d.slice(1)}`
-  if (d.length <= 7) return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4)}`
-  if (d.length <= 9) return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`
-  return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7,9)}-${d.slice(9)}`
+  if (digits.length <= 3) return `+7 ${digits}`
+  if (digits.length <= 6) return `+7 ${digits.slice(0,3)} ${digits.slice(3)}`
+  if (digits.length <= 8) return `+7 ${digits.slice(0,3)} ${digits.slice(3,6)}-${digits.slice(6)}`
+  return `+7 ${digits.slice(0,3)} ${digits.slice(3,6)}-${digits.slice(6,8)}-${digits.slice(8)}`
 }
 
 // ─── Floating Label Input ─────────────────────────────
@@ -492,7 +487,7 @@ export default function Home() {
                       label="Номер телефона *"
                       value={card2Phone}
                       onChange={markCard2PhoneDirty}
-                      placeholder="+7 (___) ___-__-__"
+                      placeholder="Номер телефона *"
                       rightIcon
                       mask="phone"
                     />
