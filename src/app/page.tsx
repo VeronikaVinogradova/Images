@@ -136,12 +136,16 @@ export default function Home() {
   const [empPushTimer, setEmpPushTimer] = useState(30)
   const [empToggleAccess, setEmpToggleAccess] = useState(true)
   const [empToggle2FA, setEmpToggle2FA] = useState(false)
+  const [empPopoverEmailOpen, setEmpPopoverEmailOpen] = useState(false)
+  const [empPopoverMobileIdOpen, setEmpPopoverMobileIdOpen] = useState(false)
 
   const notifRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const phonePopoverRef = useRef<HTMLDivElement>(null)
   const consentPopoverRef = useRef<HTMLDivElement>(null)
   const howItWorksRef = useRef<HTMLDivElement>(null)
+  const empPopoverEmailRef = useRef<HTMLDivElement>(null)
+  const empPopoverMobileIdRef = useRef<HTMLDivElement>(null)
 
   // ─── Card field states ────────────────────────────
   // Card 1
@@ -275,12 +279,18 @@ export default function Home() {
       if (howItWorksRef.current && !howItWorksRef.current.contains(e.target as Node)) {
         setHowItWorksOpen(false)
       }
+      if (empPopoverEmailRef.current && !empPopoverEmailRef.current.contains(e.target as Node)) {
+        setEmpPopoverEmailOpen(false)
+      }
+      if (empPopoverMobileIdRef.current && !empPopoverMobileIdRef.current.contains(e.target as Node)) {
+        setEmpPopoverMobileIdOpen(false)
+      }
     }
-    if (popoverOpen || phonePopoverOpen || consentPopoverOpen || howItWorksOpen) {
+    if (popoverOpen || phonePopoverOpen || consentPopoverOpen || howItWorksOpen || empPopoverEmailOpen || empPopoverMobileIdOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen, howItWorksOpen])
+  }, [popoverOpen, phonePopoverOpen, consentPopoverOpen, howItWorksOpen, empPopoverEmailOpen, empPopoverMobileIdOpen])
 
   // ─── Dirty trackers per card ─────────────────────
   const markCard1Dirty = useCallback((val: string) => { setCard1CompanyName(val); setCard1Dirty(true) }, [])
@@ -1200,21 +1210,61 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Почта для получения пароля</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm text-gray-900">{emp.email}</span>
-                        <Info size={14} className="text-gray-400" />
+                      <div className="relative" ref={empPopoverEmailRef}>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm text-gray-900">{emp.email}</span>
+                          <button
+                            onClick={() => setEmpPopoverEmailOpen(!empPopoverEmailOpen)}
+                            className={`transition-colors ${empPopoverEmailOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                          >
+                            <Info size={14} />
+                          </button>
+                        </div>
+                        {empPopoverEmailOpen && (
+                          <div className="absolute right-0 top-[22px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                            <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                            <p className="text-[13px] leading-[1.5] text-gray-200">
+                              На эту почту будут отправляться ссылки для сброса пароля при входе в личный кабинет АТС
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Номер для входа по Mobile ID</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm text-gray-400">{empMobileId ? formatPhoneMask(empMobileId) : '—'}</span>
-                        <Info size={14} className="text-gray-400" />
+                      <div className="relative" ref={empPopoverMobileIdRef}>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm text-gray-400">{empMobileId ? formatPhoneMask(empMobileId) : '—'}</span>
+                          <button
+                            onClick={() => setEmpPopoverMobileIdOpen(!empPopoverMobileIdOpen)}
+                            className={`transition-colors ${empPopoverMobileIdOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+                          >
+                            <Info size={14} />
+                          </button>
+                        </div>
+                        {empPopoverMobileIdOpen && (
+                          <div className="absolute right-0 top-[22px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+                            <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+                            <div className="text-[13px] leading-[1.5] text-gray-200">
+                              <p>Mobile ID — это защищённый способ входа по номеру телефона без пароля. Мы отправляем Push-уведомление прямо на телефон.</p>
+                              <ul className="mt-3 space-y-1 pl-1">
+                                <li className="flex gap-2"><span className="shrink-0">•</span><span>введите свой номер телефона при авторизации</span></li>
+                                <li className="flex gap-2"><span className="shrink-0">•</span><span>на телефоне появится Push-уведомление</span></li>
+                                <li className="flex gap-2"><span className="shrink-0">•</span><span>для подтверждения нажмите «Разрешить»</span></li>
+                              </ul>
+                              <p className="mt-3">
+                                Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придет SMS со ссылкой для подтверждения
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Сбросить пароль</button>
                   </div>
-                  <div className="mt-5 flex justify-end">
+                  <div className="mt-5 flex justify-end gap-3">
+                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+                      Сбросить пароль
+                    </button>
                     <button
                       onClick={handleGoToEmployeeEditRights}
                       className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
