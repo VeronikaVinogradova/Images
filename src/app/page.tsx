@@ -454,8 +454,8 @@ export default function Home() {
                 {/* Action items */}
                 <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <Check size={14} className="text-green-600" strokeWidth={2.5} />
+                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                      <Check size={14} className="text-blue-600" strokeWidth={2.5} />
                     </div>
                     <span className="text-sm text-blue-600 font-medium cursor-pointer hover:underline">Подключить номера сотрудников</span>
                   </div>
