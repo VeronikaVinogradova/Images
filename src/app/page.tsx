@@ -490,11 +490,11 @@ export default function Home() {
                   <div className="flex justify-between">
                     <div>
                       <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
-                      <p className="text-xs text-gray-500 mt-0.5">пакет</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
                     </div>
                     <div>
-                      <span className="text-base text-gray-900">0 ₽</span>
-                      <p className="text-xs text-gray-500 mt-0.5">сверх пакета</p>
+                      <span className="text-base font-semibold text-gray-900">0 ₽</span>
+                      <p className="text-xs text-gray-500 mt-0.5">Сверх пакета</p>
                     </div>
                     <div>
                       <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
