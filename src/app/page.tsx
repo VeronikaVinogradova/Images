@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Bell, User, Info, Moon, Settings, Users, Calendar,
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
-  Mail, Menu, MoreVertical, Check, CircleHelp, X,
+  Mail, Menu, MoreVertical, Check, CircleHelp, X, Pencil,
   Plus, CheckCircle2, Search, ChevronDown, Filter, Download,
   Smartphone, CirclePlus
 } from 'lucide-react'
@@ -478,7 +478,15 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* Tariff Card */}
                 <div className="bg-white rounded-xl border border-gray-100 p-6">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Стандартный / Пакет</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Стандартный</h3>
+                      <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
+                    </div>
+                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                      <Pencil size={16} strokeWidth={1.8} />
+                    </button>
+                  </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Пакет</span>
