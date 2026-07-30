@@ -6,7 +6,7 @@ import {
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
   Mail, Menu, MoreVertical, Check, CircleHelp, X, Pencil,
   Plus, CheckCircle2, Search, ChevronDown, Filter, Download,
-  Smartphone, CirclePlus
+  Smartphone, CirclePlus, Mic, Headphones, Voicemail
 } from 'lucide-react'
 
 // ─── Phone Mask Helper ─────────────────────────────
@@ -291,9 +291,9 @@ export default function Home() {
 
   // ─── Sample table data ──────────────────────────
   const sampleNumbers = [
-    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: 'Запись' },
-    { number: '+7 (999) 234-56-78', name: 'Петрова Мария', short: '102', sip: 'Offline', minutes: '—', dept: 'Поддержка', role: 'Оператор', contract: '№1234', services: '—' },
-    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: 'Запись, Голос. почта' },
+    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: ['recording'] },
+    { number: '+7 (999) 234-56-78', name: 'Петрова Мария', short: '102', sip: 'Offline', minutes: '—', dept: 'Поддержка', role: 'Оператор', contract: '№1234', services: [] },
+    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: ['recording', 'voicemail'] },
   ]
 
   return (
@@ -638,7 +638,26 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm text-gray-700">{row.dept}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.role}</td>
                           <td className="px-4 py-3 text-sm text-gray-500">{row.contract}</td>
-                          <td className="px-4 py-3 text-sm text-gray-700">{row.services}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1.5">
+                              {row.services.includes('recording') && (
+                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Запись разговора">
+                                  <Mic size={15} className="text-gray-600" strokeWidth={1.8} />
+                                </span>
+                              )}
+                              {row.services.includes('callcenter') && (
+                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Колл-центр">
+                                  <Headphones size={15} className="text-gray-600" strokeWidth={1.8} />
+                                </span>
+                              )}
+                              {row.services.includes('voicemail') && (
+                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Голосовая почта">
+                                  <Voicemail size={15} className="text-gray-600" strokeWidth={1.8} />
+                                </span>
+                              )}
+                              {row.services.length === 0 && <span className="text-sm text-gray-400">—</span>}
+                            </div>
+                          </td>
                           <td className="px-4 py-3">
                             <button className="text-gray-400 hover:text-gray-600 transition-colors">
                               <MoreVertical size={16} />
