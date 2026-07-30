@@ -397,7 +397,7 @@ export default function Home() {
             <button
               key={idx}
               onClick={() => {
-                if (isBurger) setCurrentPage('home')
+                if (isBurger || item.label === 'Пользователи') setCurrentPage('home')
                 if (isSettings) setCurrentPage('settings')
               }}
               className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${buttonClass}`}
@@ -414,12 +414,12 @@ export default function Home() {
         {/* ─── Header ──────────────────────────── */}
         <header className="h-16 border-b border-gray-200 flex items-center justify-between px-8 bg-white shrink-0">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
               <span className="text-white text-xs font-bold">Л</span>
             </div>
             <span className="text-base font-bold text-gray-900 tracking-tight">логотип</span>
-          </div>
+          </button>
 
           {/* Right icons */}
           <div className="flex items-center gap-4">
