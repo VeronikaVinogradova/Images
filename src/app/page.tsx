@@ -389,13 +389,12 @@ export default function Home() {
                         </p>
                         <button
                           onClick={handleGoToProfile}
-                          className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
+                          className="mt-3 text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
                         >
                           Перейти в профиль
                         </button>
                       </div>
                     </div>
-                    <div className="absolute left-0 top-0 w-1 h-full bg-blue-500 rounded-r" />
                   </div>
 
                   <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
