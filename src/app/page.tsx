@@ -6,7 +6,9 @@ import {
   ShoppingCart, Zap, BarChart3, Folder, Phone, HelpCircle,
   Mail, Menu, MoreVertical, Check, CircleHelp, X, Pencil,
   Plus, CheckCircle2, Search, ChevronDown, Filter, Download,
-  Smartphone, CirclePlus, Mic, Headphones, Voicemail
+  Smartphone, CirclePlus, Mic, Headphones, Voicemail,
+  ChevronRight, Trash2, ArrowLeft, Shield, PhoneForwarded,
+  PhoneOff, ListChecks, VoicemailSquare, Hash
 } from 'lucide-react'
 
 // ─── Phone Mask Helper ─────────────────────────────
@@ -106,7 +108,7 @@ const tabs = [
 
 // ─── Main Component ────────────────────────────────────
 export default function Home() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'settings'>('home')
+  const [currentPage, setCurrentPage] = useState<'home' | 'settings' | 'employee-profile' | 'employee-edit-rights'>('home')
   const [activeTab, setActiveTab] = useState(0)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [toggle2FA, setToggle2FA] = useState(false)
@@ -125,6 +127,15 @@ export default function Home() {
   // Push confirmation dialog
   const [showPushDialog, setShowPushDialog] = useState(false)
   const [pushTimer, setPushTimer] = useState(30)
+
+  // Employee profile
+  const [selectedEmployeeIdx, setSelectedEmployeeIdx] = useState(0)
+  const [empMobileId, setEmpMobileId] = useState('')
+  const [empMobileIdDisplay, setEmpMobileIdDisplay] = useState('')
+  const [showEmpPushDialog, setShowEmpPushDialog] = useState(false)
+  const [empPushTimer, setEmpPushTimer] = useState(30)
+  const [empToggleAccess, setEmpToggleAccess] = useState(true)
+  const [empToggle2FA, setEmpToggle2FA] = useState(false)
 
   const notifRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -204,6 +215,20 @@ export default function Home() {
       return () => clearInterval(id)
     }
   }, [showPushDialog, pushTimer])
+
+  // ─── Employee Push timer effect ────────────────────────
+  useEffect(() => {
+    if (showEmpPushDialog && empPushTimer > 0) {
+      const id = setInterval(() => setEmpPushTimer(t => {
+        if (t <= 1) {
+          clearInterval(id)
+          return 0
+        }
+        return t - 1
+      }), 1000)
+      return () => clearInterval(id)
+    }
+  }, [showEmpPushDialog, empPushTimer])
 
   // Close notifications on outside click
   useEffect(() => {
@@ -291,10 +316,52 @@ export default function Home() {
 
   // ─── Sample table data ──────────────────────────
   const sampleNumbers = [
-    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: ['recording'] },
-    { number: '+7 (999) 234-56-78', name: 'Петрова Мария', short: '102', sip: 'Offline', minutes: '—', dept: 'Поддержка', role: 'Оператор', contract: '№1234', services: [] },
-    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: ['recording', 'voicemail'] },
+    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: ['recording'], email: 'ivanov@company.ru', position: 'Менеджер', mobileId: '' },
+    { number: '+7 (999) 234-56-78', name: 'Петрова Мария', short: '102', sip: 'Offline', minutes: '—', dept: 'Поддержка', role: 'Оператор', contract: '№1234', services: [], email: 'petrova@company.ru', position: 'Старший оператор', mobileId: '' },
+    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: ['recording', 'voicemail'], email: 'sidorov@company.ru', position: 'Руководитель отдела', mobileId: '' },
   ]
+
+  // ─── Employee helpers ──────────────────────────
+  const emp = sampleNumbers[selectedEmployeeIdx]
+  const empShortNumber = emp.number.replace(/[^\d]/g, '').slice(1)
+
+  const handleGoToEmployeeProfile = (idx: number) => {
+    setSelectedEmployeeIdx(idx)
+    setEmpMobileId(emp.mobileId)
+    setEmpMobileIdDisplay('')
+    setCurrentPage('employee-profile')
+  }
+
+  const handleGoToEmployeeEditRights = () => {
+    setEmpMobileIdDisplay('')
+    setCurrentPage('employee-edit-rights')
+  }
+
+  const handleEmpMobileIdCheck = () => {
+    if (empMobileIdDisplay) {
+      setEmpPushTimer(30)
+      setShowEmpPushDialog(true)
+    }
+  }
+
+  const handleEmpPushCancel = () => {
+    setShowEmpPushDialog(false)
+    showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
+    setEmpMobileId('')
+    setEmpMobileIdDisplay('')
+  }
+
+  const handleEmpPushResend = () => {
+    setEmpPushTimer(30)
+  }
+
+  const handleEmpPushSimulate = () => {
+    setShowEmpPushDialog(false)
+    setEmpMobileId(empMobileIdDisplay)
+    sampleNumbers[selectedEmployeeIdx].mobileId = empMobileIdDisplay
+    showSnackbar('Изменения сохранены')
+    setCurrentPage('employee-profile')
+  }
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -636,7 +703,14 @@ export default function Home() {
                           <td className="px-4 py-3">
                             <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">{row.number}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">
+                            <button
+                              onClick={() => handleGoToEmployeeProfile(i)}
+                              className="text-left hover:text-blue-500 transition-colors"
+                            >
+                              {row.number}
+                            </button>
+                          </td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.name}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.short}</td>
                           <td className="px-4 py-3">
@@ -1036,6 +1110,325 @@ export default function Home() {
               </div>
             </div>
           </main>
+        ) : currentPage === 'employee-profile' ? (
+          /* ═══════════════════════════════════════════════════════
+             EMPLOYEE PROFILE PAGE
+             ═══════════════════════════════════════════════════════ */
+          <main className="flex-1 p-8 bg-gray-50/50">
+            <div className="max-w-[1400px] mx-auto">
+              {/* Breadcrumb */}
+              <nav className="flex items-center gap-1.5 text-sm mb-6">
+                <button onClick={() => setCurrentPage('home')} className="text-gray-500 hover:text-gray-700 transition-colors">Номера</button>
+                <ChevronRight size={14} className="text-gray-400" />
+                <span className="text-gray-900 font-medium">Профиль {emp.number}</span>
+              </nav>
+
+              {/* Profile header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">Профиль {emp.number}</h1>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    Активен
+                  </span>
+                </div>
+                <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <Trash2 size={16} strokeWidth={1.8} />
+                  Удалить сотрудника
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 -mt-6 mb-8">{emp.name}</p>
+
+              {/* ─── Two cards row ──────────────────── */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+                {/* Card: Контактные данные */}
+                <div className="bg-white rounded-xl border border-gray-100 p-6">
+                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Контактные данные</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Телефон</span>
+                      <span className="text-sm text-gray-900 font-medium">{empShortNumber.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2-$3-$4')}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Короткий номер</span>
+                      <span className="text-sm text-gray-900">{emp.short}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Имя и фамилия</span>
+                      <span className="text-sm text-gray-900">{emp.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Контактная почта</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-gray-900">{emp.email}</span>
+                        <Info size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Подразделение</span>
+                      <span className="text-sm text-gray-900">{emp.dept}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Должность</span>
+                      <span className="text-sm text-gray-900">{emp.position}</span>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex justify-end">
+                    <button className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+                      <Pencil size={14} strokeWidth={1.8} />
+                      Редактировать
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card: Права доступа */}
+                <div className="bg-white rounded-xl border border-gray-100 p-6">
+                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Доступ к личному кабинету</span>
+                      <span className="text-sm text-gray-900">Включен</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Роль</span>
+                      <span className="text-sm text-gray-900">{emp.role}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Двухфакторная аутентификация</span>
+                      <span className="text-sm text-gray-400">Выключена</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Почта для получения пароля</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-gray-900">{emp.email}</span>
+                        <Info size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Номер для входа по Mobile ID</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-gray-400">{empMobileId ? formatPhoneMask(empMobileId) : '—'}</span>
+                        <Info size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Сбросить пароль</button>
+                  </div>
+                  <div className="mt-5 flex justify-end">
+                    <button
+                      onClick={handleGoToEmployeeEditRights}
+                      className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+                    >
+                      <Pencil size={14} strokeWidth={1.8} />
+                      Редактировать
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Настройки сотрудника ──────────── */}
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Настройки сотрудника</h2>
+              <div className="space-y-4 mb-8">
+                {[
+                  { on: true, title: 'Активация SIP', desc: 'Принимайте и совершайте звонки через интернет' },
+                  { on: false, title: 'Переадресация', desc: 'Переводите входящие звонки на другой номер' },
+                  { on: false, title: 'Чёрные и белые списки', desc: 'Списки запрещенных и разрешенных абонентов' },
+                  { on: false, title: 'Голосовая почта', desc: 'Автоответчик сотрудника' },
+                ].map((item, i) => (
+                  <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`toggle-track shrink-0 ${item.on ? 'active' : ''}`}
+                      >
+                        <div className="toggle-thumb" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Настроить</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* ─── Услуги ──────────────────── */}
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Услуги, к которым подключен сотрудник{emp.services.length > 0 && ` (${emp.services.length})`}
+              </h2>
+              <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Тип услуги</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Название услуги</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Многоканальный номер</th>
+                      <th className="w-10 px-5 py-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {emp.services.length === 0 && (
+                      <tr><td colSpan={4} className="px-5 py-8 text-sm text-gray-400 text-center">Нет подключенных услуг</td></tr>
+                    )}
+                    {emp.services.includes('recording') && (
+                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-5 py-3 text-sm text-gray-700">Запись разговора</td>
+                        <td className="px-5 py-3 text-sm text-gray-700">Запись разговоров</td>
+                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+                      </tr>
+                    )}
+                    {emp.services.includes('voicemail') && (
+                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-5 py-3 text-sm text-gray-700">Голосовая почта</td>
+                        <td className="px-5 py-3 text-sm text-gray-700">Голосовая почта</td>
+                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+                      </tr>
+                    )}
+                    {emp.services.includes('callcenter') && (
+                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-5 py-3"><Headphones size={16} className="text-gray-600" /></td>
+                        <td className="px-5 py-3 text-sm text-gray-700">Колл-центр</td>
+                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </main>
+        ) : currentPage === 'employee-edit-rights' ? (
+          /* ═══════════════════════════════════════════════════════
+             EMPLOYEE EDIT RIGHTS PAGE
+             ═══════════════════════════════════════════════════════ */
+          <main className="flex-1 p-8 bg-gray-50/50">
+            <div className="max-w-[1400px] mx-auto">
+              {/* Breadcrumb */}
+              <nav className="flex items-center gap-1.5 text-sm mb-6">
+                <button onClick={() => setCurrentPage('home')} className="text-gray-500 hover:text-gray-700 transition-colors">Номера</button>
+                <ChevronRight size={14} className="text-gray-400" />
+                <button onClick={() => setCurrentPage('employee-profile')} className="text-gray-500 hover:text-gray-700 transition-colors">Профиль {emp.number}</button>
+                <ChevronRight size={14} className="text-gray-400" />
+                <span className="text-gray-900 font-medium">Права доступа</span>
+              </nav>
+
+              {/* Page header */}
+              <h1 className="text-2xl font-semibold text-gray-900 mb-1">Права доступа профиля {emp.number}</h1>
+              <p className="text-sm text-gray-500 mb-8">{emp.name}</p>
+
+              <div className="max-w-[640px]">
+                {/* Email field (read-only display) */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Почта для получения пароля*</label>
+                  <div className="relative">
+                    <div className="w-full h-[48px] px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent flex items-center">
+                      {emp.email}
+                    </div>
+                    <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      <Pencil size={16} strokeWidth={1.8} />
+                    </button>
+                  </div>
+                  <p className="mt-1.5 text-xs text-gray-500">Используется для доступа в ОАТС</p>
+                </div>
+
+                {/* Mobile ID inline edit */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Номер для входа по Mobile ID</label>
+                  <div className="relative">
+                    <div
+                      className="w-full h-[48px] px-4 pr-20 bg-white rounded-lg text-sm text-gray-900 border-[1.5px] border-gray-900 focus-within:border-gray-900 flex items-center"
+                    >
+                      <input
+                        type="text"
+                        value={formatPhoneMask(empMobileIdDisplay)}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '')
+                          const raw = digits.length > 0 && (digits[0] === '7' || digits[0] === '8') ? digits.slice(1) : digits
+                          setEmpMobileIdDisplay(raw.slice(0, 10))
+                        }}
+                        placeholder=""
+                        className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
+                      />
+                      {empMobileIdDisplay && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={handleEmpMobileIdCheck}
+                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-green-600"
+                          >
+                            <Check size={18} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            onClick={() => setEmpMobileIdDisplay('')}
+                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-400"
+                          >
+                            <X size={18} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                    На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
+                  </p>
+                </div>
+
+                {/* Role dropdown */}
+                <div className="mb-8">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Роль доступа</label>
+                  <div className="relative">
+                    <select className="w-full h-[48px] px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
+                      <option>Сотрудник</option>
+                      <option>Администратор</option>
+                      <option>Оператор</option>
+                    </select>
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Toggles */}
+                <div className="space-y-5 mb-8">
+                  <div className="flex items-start gap-3">
+                    <div
+                      onClick={() => setEmpToggleAccess(!empToggleAccess)}
+                      className={`toggle-track shrink-0 mt-0.5 ${empToggleAccess ? 'active' : ''}`}
+                    >
+                      <div className="toggle-thumb" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900">Разрешить доступ к личному кабинету АТС</p>
+                        <Info size={14} className="text-gray-400 shrink-0" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div
+                      onClick={() => setEmpToggle2FA(!empToggle2FA)}
+                      className={`toggle-track shrink-0 mt-0.5 ${empToggle2FA ? 'active' : ''}`}
+                    >
+                      <div className="toggle-thumb" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900">Включить двухфакторную аутентификацию</p>
+                        <Info size={14} className="text-gray-400 shrink-0" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Close button */}
+                <button
+                  onClick={() => setCurrentPage('employee-profile')}
+                  className="bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg px-6 py-2.5 hover:bg-yellow-400 transition-colors"
+                >
+                  Закрыть окно
+                </button>
+              </div>
+            </div>
+          </main>
         )}
       </div>
 
@@ -1133,6 +1526,56 @@ export default function Home() {
                 }`}
               >
                 Отправить повторно: {pushTimer} сек
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          EMPLOYEE PUSH CONFIRMATION DIALOG
+          ═══════════════════════════════════════════════════════════ */}
+      {showEmpPushDialog && (
+        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
+          <div className="bg-white rounded-2xl max-w-[540px] w-full mx-4 p-8">
+            <h3 className="text-base font-semibold text-gray-900 leading-snug">
+              Мы отправили запрос подтверждения на указанный номер {formatPhoneMask(empMobileIdDisplay)}
+            </h3>
+
+            <div className="mt-5">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Чтобы использовать этот номер для входа в личный кабинет, откройте уведомление и нажмите «Подтвердить».
+              </p>
+              <p className="mt-3 text-sm text-gray-700 leading-relaxed">
+                Запрос придет в виде Push-уведомления или SMS. Если вы не получили уведомление, отправьте запрос повторно или попробуйте позже.
+              </p>
+            </div>
+
+            {/* Simulate push confirm */}
+            <button
+              onClick={handleEmpPushSimulate}
+              className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              ✓ Подтвердить пуш (симуляция)
+            </button>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={handleEmpPushCancel}
+                className="border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+              >
+                Отменить изменения
+              </button>
+              <button
+                onClick={handleEmpPushResend}
+                disabled={empPushTimer > 0}
+                className={`bg-yellow-300 text-gray-900 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+                  empPushTimer > 0
+                    ? 'opacity-40 cursor-not-allowed'
+                    : 'hover:bg-yellow-400 cursor-pointer'
+                }`}
+              >
+                Отправить повторно: {empPushTimer} сек
               </button>
             </div>
           </div>
