@@ -562,44 +562,61 @@ export default function Home() {
                 </div>
 
                 {/* Toolbar */}
-                <div className="flex items-center gap-3 mb-4 flex-wrap">
-                  <div className="relative flex-1 min-w-[200px] max-w-[320px]">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Поиск"
-                      className="w-full h-9 pl-9 pr-4 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
-                    />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="relative w-[240px]">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Поиск"
+                        className="w-full h-9 pl-9 pr-4 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+                      />
+                    </div>
+                    <div className="relative">
+                      <select className="h-9 px-3 pr-8 bg-gray-100 rounded-lg text-sm text-gray-700 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
+                        <option>Везде</option>
+                        <option>Номер</option>
+                        <option>Имя</option>
+                        <option>Подразделение</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                    <button className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200">
+                      <Filter size={16} strokeWidth={1.8} />
+                    </button>
                   </div>
-                  <div className="relative">
-                    <select className="h-9 px-3 pr-8 bg-gray-100 rounded-lg text-sm text-gray-700 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
-                      <option>Везде</option>
-                      <option>Номер</option>
-                      <option>Имя</option>
-                      <option>Подразделение</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <div className="flex items-center gap-3">
+                    <button className="h-9 px-3 flex items-center gap-1.5 rounded-lg text-sm text-gray-700 font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+                      <Download size={14} strokeWidth={1.8} />
+                      Импорт
+                    </button>
+                    <button className="h-9 px-4 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors">
+                      + Добавить номера
+                    </button>
                   </div>
-                  <button className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200">
-                    <Filter size={16} strokeWidth={1.8} />
-                  </button>
-                  <button className="h-9 px-3 flex items-center gap-1.5 rounded-lg text-sm text-gray-700 font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
-                    <Download size={14} strokeWidth={1.8} />
-                    Импорт
-                  </button>
-                  <button className="h-9 px-4 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors">
-                    + Добавить номера
-                  </button>
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto">
-                  <table className="w-full min-w-[900px]">
+                <div className="bg-white rounded-xl border border-gray-100">
+                  <table className="w-full table-fixed">
+                    <colgroup>
+                      <col className="w-10" />
+                      <col style={{ width: 174 }} />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <col className="w-10" />
+                    </colgroup>
                     <thead>
                       <tr className="border-b border-gray-100">
-                        <th className="w-10 px-4 py-3">
+                        <th className="px-4 py-3">
                           <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Номер</th>
@@ -611,7 +628,7 @@ export default function Home() {
                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Роль</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Договор</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Услуги</th>
-                        <th className="w-10 px-4 py-3"></th>
+                        <th className="px-4 py-3"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -620,7 +637,7 @@ export default function Home() {
                           <td className="px-4 py-3">
                             <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 font-medium">{row.number}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">{row.number}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.name}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.short}</td>
                           <td className="px-4 py-3">
