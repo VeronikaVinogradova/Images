@@ -452,8 +452,8 @@ export default function Home() {
                 </div>
 
                 {/* Action items */}
-                <div className="mt-6 space-y-3">
-                  <div className="flex items-center gap-3">
+                <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
+                  <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                       <Check size={14} className="text-green-600" strokeWidth={2.5} />
                     </div>
@@ -464,7 +464,7 @@ export default function Home() {
                     'Создать маршрут',
                     'Подключить запись звонков',
                   ].map((label, i) => (
-                    <div key={i} className="flex items-center gap-3">
+                    <div key={i} className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                         <CirclePlus size={14} className="text-gray-400" strokeWidth={2} />
                       </div>
