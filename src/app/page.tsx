@@ -478,7 +478,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* Tariff Card */}
                 <div className="bg-white rounded-xl border border-gray-100 p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-5">
                     <div>
                       <h3 className="text-sm font-semibold text-gray-900">Стандартный</h3>
                       <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
@@ -487,18 +487,18 @@ export default function Home() {
                       <Pencil size={16} strokeWidth={1.8} />
                     </button>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Пакет</span>
-                      <span className="text-gray-900">3 490 ₽</span>
+                  <div className="flex justify-between">
+                    <div>
+                      <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
+                      <p className="text-xs text-gray-500 mt-0.5">пакет</p>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Сверх пакета</span>
-                      <span className="text-gray-900">0 ₽</span>
+                    <div>
+                      <span className="text-base text-gray-900">0 ₽</span>
+                      <p className="text-xs text-gray-500 mt-0.5">сверх пакета</p>
                     </div>
-                    <div className="border-t border-gray-100 pt-2 flex justify-between text-sm font-bold">
-                      <span className="text-gray-900">Итого</span>
-                      <span className="text-gray-900">3 490 ₽</span>
+                    <div>
+                      <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
+                      <p className="text-xs text-gray-500 mt-0.5">Итого</p>
                     </div>
                   </div>
                   <button className="mt-4 w-full px-4 py-2 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
