@@ -1371,11 +1371,13 @@ export default function Home() {
               <div className="max-w-[640px]">
                 {/* Email field (read-only display) */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Почта для получения пароля*</label>
-                  <div className="relative">
-                    <div className="w-full h-[48px] px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent flex items-center">
-                      {emp.email}
-                    </div>
+                  <div className="relative" ref={empPopoverEmailRef}>
+                    <FloatingInput
+                      label="Почта для получения пароля*"
+                      value={emp.email}
+                      readOnly
+                      rightIcon
+                    />
                     <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                       <Pencil size={16} strokeWidth={1.8} />
                     </button>
@@ -1385,11 +1387,15 @@ export default function Home() {
 
                 {/* Mobile ID inline edit */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Личный номер для входа Mobile ID</label>
                   <div className="relative">
                     <div
-                      className="w-full h-[48px] px-4 pr-20 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 flex items-center"
+                      className={`w-full h-[48px] px-4 pr-20 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 focus-within:bg-white flex items-center transition-colors ${empMobileIdDisplay ? 'pt-[12px]' : ''}`}
                     >
+                      {empMobileIdDisplay && (
+                        <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+                          Личный номер для входа Mobile ID
+                        </span>
+                      )}
                       <input
                         type="text"
                         value={formatPhoneMask(empMobileIdDisplay)}
@@ -1398,7 +1404,7 @@ export default function Home() {
                           const raw = digits.length > 0 && (digits[0] === '7' || digits[0] === '8') ? digits.slice(1) : digits
                           setEmpMobileIdDisplay(raw.slice(0, 10))
                         }}
-                        placeholder=""
+                        placeholder={empMobileIdDisplay ? ' ' : 'Личный номер для входа Mobile ID'}
                         className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
@@ -1430,13 +1436,15 @@ export default function Home() {
 
                 {/* Role dropdown */}
                 <div className="mb-8">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Роль доступа</label>
                   <div className="relative">
-                    <select className="w-full h-[48px] px-4 pr-10 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
+                    <select className="w-full h-[48px] px-4 pr-10 pt-[12px] bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
                       <option>Сотрудник</option>
                       <option>Администратор</option>
                       <option>Оператор</option>
                     </select>
+                    <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+                      Роль доступа
+                    </span>
                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                   </div>
                 </div>
