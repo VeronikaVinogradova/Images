@@ -1388,7 +1388,7 @@ export default function Home() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Личный номер для входа Mobile ID</label>
                   <div className="relative">
                     <div
-                      className="w-full h-[48px] px-4 pr-10 bg-white rounded-lg text-sm text-gray-900 border border-gray-300 focus-within:border-gray-900 flex items-center"
+                      className="w-full h-[48px] px-4 pr-20 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 flex items-center"
                     >
                       <input
                         type="text"
@@ -1401,25 +1401,27 @@ export default function Home() {
                         placeholder=""
                         className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                       />
-                      {empMobileIdDisplay ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={handleEmpMobileIdCheck}
-                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-green-600"
-                          >
-                            <Check size={18} strokeWidth={2.5} />
-                          </button>
-                          <button
-                            onClick={() => setEmpMobileIdDisplay('')}
-                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-400"
-                          >
-                            <X size={18} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      ) : (
-                        <Pencil size={16} strokeWidth={1.8} className="text-gray-400" />
-                      )}
                     </div>
+                    {empMobileIdDisplay ? (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                        <button
+                          onClick={handleEmpMobileIdCheck}
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-green-600"
+                        >
+                          <Check size={18} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          onClick={() => setEmpMobileIdDisplay('')}
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-gray-400"
+                        >
+                          <X size={18} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <Pencil size={16} strokeWidth={1.8} />
+                      </button>
+                    )}
                   </div>
                   <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
                     На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
