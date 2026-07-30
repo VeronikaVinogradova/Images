@@ -483,11 +483,11 @@ export default function Home() {
               )}
             </div>
 
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+            <button onClick={() => setCurrentPage('settings')} className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
               <Settings size={20} strokeWidth={1.8} />
             </button>
 
-            <button className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+            <button onClick={() => setCurrentPage('home')} className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
               <User size={20} strokeWidth={1.8} />
             </button>
           </div>
