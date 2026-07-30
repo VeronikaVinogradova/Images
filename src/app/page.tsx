@@ -483,7 +483,7 @@ export default function Home() {
                       <h3 className="text-sm font-semibold text-gray-900">Стандартный</h3>
                       <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
                     </div>
-                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors">
                       <Pencil size={16} strokeWidth={1.8} />
                     </button>
                   </div>
