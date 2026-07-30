@@ -1385,10 +1385,10 @@ export default function Home() {
 
                 {/* Mobile ID inline edit */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Номер для входа по Mobile ID</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Личный номер для входа Mobile ID</label>
                   <div className="relative">
                     <div
-                      className="w-full h-[48px] px-4 pr-20 bg-white rounded-lg text-sm text-gray-900 border-[1.5px] border-gray-300 focus-within:border-gray-900 flex items-center"
+                      className="w-full h-[48px] px-4 pr-10 bg-white rounded-lg text-sm text-gray-900 border border-gray-300 focus-within:border-gray-900 flex items-center"
                     >
                       <input
                         type="text"
@@ -1401,7 +1401,7 @@ export default function Home() {
                         placeholder=""
                         className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                       />
-                      {empMobileIdDisplay && (
+                      {empMobileIdDisplay ? (
                         <div className="flex items-center gap-1">
                           <button
                             onClick={handleEmpMobileIdCheck}
@@ -1416,6 +1416,8 @@ export default function Home() {
                             <X size={18} strokeWidth={2.5} />
                           </button>
                         </div>
+                      ) : (
+                        <Pencil size={16} strokeWidth={1.8} className="text-gray-400" />
                       )}
                     </div>
                   </div>
