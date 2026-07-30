@@ -291,9 +291,9 @@ export default function Home() {
 
   // ─── Sample table data ──────────────────────────
   const sampleNumbers = [
-    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542 мин', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: 'Запись' },
+    { number: '+7 (999) 123-45-67', name: 'Иванов Иван', short: '101', sip: 'Online', minutes: '542', dept: 'Отдел продаж', role: 'Администратор', contract: '№1234', services: 'Запись' },
     { number: '+7 (999) 234-56-78', name: 'Петрова Мария', short: '102', sip: 'Offline', minutes: '—', dept: 'Поддержка', role: 'Оператор', contract: '№1234', services: '—' },
-    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230 мин', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: 'Запись, Голос. почта' },
+    { number: '+7 (999) 345-67-89', name: 'Сидоров Алексей', short: '103', sip: 'Online', minutes: '1 230', dept: 'Отдел продаж', role: 'Менеджер', contract: '№1234', services: 'Запись, Голос. почта' },
   ]
 
   return (
@@ -602,15 +602,15 @@ export default function Home() {
                         <th className="w-10 px-4 py-3">
                           <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Номер</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Имя</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Короткий</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус SIP</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Доступно мин</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Подразделение</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Роль</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Договор</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Услуги</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Номер</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Имя</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Короткий</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Статус SIP</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Доступно, мин</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Подразделение</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Роль</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Договор</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Услуги</th>
                         <th className="w-10 px-4 py-3"></th>
                       </tr>
                     </thead>
@@ -624,14 +624,15 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm text-gray-700">{row.name}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.short}</td>
                           <td className="px-4 py-3">
-                            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${
-                              row.sip === 'Online'
-                                ? 'bg-green-50 text-green-700'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${row.sip === 'Online' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                              {row.sip}
-                            </span>
+                            {row.sip === 'Online' ? (
+                              <span className="inline-flex w-6 h-6 rounded-full bg-green-100 items-center justify-center">
+                                <Check size={14} className="text-green-600" strokeWidth={2.5} />
+                              </span>
+                            ) : (
+                              <span className="inline-flex w-6 h-6 rounded-full bg-red-100 items-center justify-center">
+                                <X size={14} className="text-red-500" strokeWidth={2.5} />
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.minutes}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{row.dept}</td>
