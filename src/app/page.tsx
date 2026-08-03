@@ -369,14 +369,19 @@ export default function Home() {
 
   const handleEmpMobileIdCheck = () => {
     if (empMobileIdDisplay) {
-      const inputDigits = empMobileIdDisplay.replace(/\D/g, '')
-      const companyDigits = card3MobileId.replace(/\D/g, '')
-      if (companyDigits && companyDigits === inputDigits) {
-        setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
-        return
+      // Check duplicate against company profile Mobile ID
+      if (card3MobileId) {
+        const inputDigits = empMobileIdDisplay.replace(/\D/g, '')
+        const companyDigits = card3MobileId.replace(/\D/g, '')
+        if (inputDigits === companyDigits) {
+          setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
+          return
+        }
       }
-      const otherEmp = sampleNumbers.find((e, i) => i !== selectedEmployeeIdx && e.mobileId && e.mobileId.replace(/\D/g, '') === inputDigits)
-      if (otherEmp) {
+      // Check duplicate against other employees
+      const inputDigits = empMobileIdDisplay.replace(/\D/g, '')
+      const isDuplicate = sampleNumbers.some((e, idx) => idx !== selectedEmployeeIdx && e.mobileId && e.mobileId.replace(/\D/g, '') === inputDigits)
+      if (isDuplicate) {
         setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
         return
       }
@@ -1481,7 +1486,10 @@ export default function Home() {
                     )}
                   </div>
                   {empMobileIdError ? (
-                    <p className="mt-1.5 text-xs text-red-600 leading-relaxed">{empMobileIdError}</p>
+                    <div className="flex items-start gap-1.5 mt-1.5">
+                      <CircleAlert size={14} className="text-red-500 shrink-0 mt-0.5" />
+                      <p className="text-xs text-red-600 leading-relaxed">{empMobileIdError}</p>
+                    </div>
                   ) : (
                     <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
                       На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
