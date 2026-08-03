@@ -186,7 +186,8 @@ export default function Home() {
 
   const handleSave3 = () => {
     if (card3MobileId) {
-      const isDuplicate = sampleNumbers.some(e => e.mobileId === card3MobileId)
+      const inputDigits = card3MobileId.replace(/\D/g, '')
+      const isDuplicate = sampleNumbers.some(e => e.mobileId && e.mobileId.replace(/\D/g, '') === inputDigits)
       if (isDuplicate) {
         setCard3MobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
         showSnackbar('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
@@ -368,7 +369,14 @@ export default function Home() {
 
   const handleEmpMobileIdCheck = () => {
     if (empMobileIdDisplay) {
-      if (card3MobileId && card3MobileId === empMobileIdDisplay) {
+      const inputDigits = empMobileIdDisplay.replace(/\D/g, '')
+      const companyDigits = card3MobileId.replace(/\D/g, '')
+      if (companyDigits && companyDigits === inputDigits) {
+        setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
+        return
+      }
+      const otherEmp = sampleNumbers.find((e, i) => i !== selectedEmployeeIdx && e.mobileId && e.mobileId.replace(/\D/g, '') === inputDigits)
+      if (otherEmp) {
         setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
         return
       }
