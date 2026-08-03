@@ -368,6 +368,7 @@ export default function Home() {
     setShowEmpPushDialog(false)
     setEmpMobileId(empMobileIdDisplay)
     sampleNumbers[selectedEmployeeIdx].mobileId = empMobileIdDisplay
+    setEmpMobileIdFocused(false)
     showSnackbar('Изменения сохранены')
   }
 
@@ -1619,7 +1620,10 @@ export default function Home() {
               ✓ Подтвердить пуш (симуляция)
             </button>
 
-            <div className="mt-6 flex justify-end gap-3">
+            {empPushTimer > 0 && (
+              <p className="mt-4 text-xs text-gray-400">Кнопки станут доступны через {empPushTimer} сек</p>
+            )}
+            <div className="mt-4 flex justify-end gap-3">
               <button
                 onClick={handleEmpPushCancel}
                 disabled={empPushTimer > 0}
