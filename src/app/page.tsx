@@ -132,6 +132,7 @@ export default function Home() {
   const [selectedEmployeeIdx, setSelectedEmployeeIdx] = useState(0)
   const [empMobileId, setEmpMobileId] = useState('')
   const [empMobileIdDisplay, setEmpMobileIdDisplay] = useState('')
+  const [empMobileIdFocused, setEmpMobileIdFocused] = useState(false)
   const [showEmpPushDialog, setShowEmpPushDialog] = useState(false)
   const [empPushTimer, setEmpPushTimer] = useState(30)
   const [empToggleAccess, setEmpToggleAccess] = useState(true)
@@ -1388,7 +1389,7 @@ export default function Home() {
                 <div className="mb-6">
                   <div className="relative">
                     <div
-                      className={`w-full h-[48px] px-4 pr-20 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 focus-within:bg-white flex items-center transition-colors ${empMobileIdDisplay ? 'pt-[12px]' : ''}`}
+                      className={`w-full h-[48px] px-4 ${empMobileIdFocused ? 'pr-20' : 'pr-10'} bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 focus-within:bg-white flex items-center transition-colors ${empMobileIdDisplay ? 'pt-[12px]' : ''}`}
                     >
                       {empMobileIdDisplay && (
                         <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
@@ -1403,29 +1404,35 @@ export default function Home() {
                           const raw = digits.length > 0 && (digits[0] === '7' || digits[0] === '8') ? digits.slice(1) : digits
                           setEmpMobileIdDisplay(raw.slice(0, 10))
                         }}
+                        onFocus={() => setEmpMobileIdFocused(true)}
+                        onBlur={() => setEmpMobileIdFocused(false)}
                         placeholder={empMobileIdDisplay ? ' ' : 'Личный номер для входа Mobile ID'}
                         className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
-                    {empMobileIdDisplay ? (
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                    {empMobileIdFocused ? (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <button
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={handleEmpMobileIdCheck}
-                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-green-600"
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-green-50 transition-colors text-green-600"
                         >
-                          <Check size={18} strokeWidth={2.5} />
+                          <Check size={16} strokeWidth={2} />
                         </button>
                         <button
-                          onClick={() => setEmpMobileIdDisplay('')}
-                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-gray-400"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => { setEmpMobileIdDisplay(''); setEmpMobileIdFocused(false) }}
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-400"
                         >
-                          <X size={18} strokeWidth={2.5} />
+                          <X size={16} strokeWidth={2} />
                         </button>
                       </div>
                     ) : (
-                      <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <Pencil size={16} strokeWidth={1.8} />
-                      </button>
+                      empMobileIdDisplay && (
+                        <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                          <Pencil size={16} strokeWidth={1.8} />
+                        </button>
+                      )
                     )}
                   </div>
                   <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
