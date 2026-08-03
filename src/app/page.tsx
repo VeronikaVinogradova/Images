@@ -349,7 +349,7 @@ export default function Home() {
 
   const handleEmpMobileIdCheck = () => {
     if (empMobileIdDisplay) {
-      setEmpPushTimer(30)
+      setEmpPushTimer(10)
       setShowEmpPushDialog(true)
     }
   }
@@ -357,12 +357,11 @@ export default function Home() {
   const handleEmpPushCancel = () => {
     setShowEmpPushDialog(false)
     showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
-    setEmpMobileId('')
     setEmpMobileIdDisplay('')
   }
 
   const handleEmpPushResend = () => {
-    setEmpPushTimer(30)
+    setEmpPushTimer(10)
   }
 
   const handleEmpPushSimulate = () => {
@@ -370,7 +369,6 @@ export default function Home() {
     setEmpMobileId(empMobileIdDisplay)
     sampleNumbers[selectedEmployeeIdx].mobileId = empMobileIdDisplay
     showSnackbar('Изменения сохранены')
-    setCurrentPage('employee-profile')
   }
 
   return (
@@ -1624,9 +1622,14 @@ export default function Home() {
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={handleEmpPushCancel}
-                className="border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+                disabled={empPushTimer > 0}
+                className={`border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+                  empPushTimer > 0
+                    ? 'opacity-40 cursor-not-allowed'
+                    : 'cursor-pointer'
+                }`}
               >
-                Отменить изменения
+                Закрыть
               </button>
               <button
                 onClick={handleEmpPushResend}
@@ -1637,7 +1640,7 @@ export default function Home() {
                     : 'hover:bg-yellow-400 cursor-pointer'
                 }`}
               >
-                Отправить повторно: {empPushTimer} сек
+                Отправить повторно
               </button>
             </div>
           </div>
