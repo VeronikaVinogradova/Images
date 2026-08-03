@@ -1,0 +1,1336 @@
+   358→    setEmpMobileId(emp.mobileId)
+   359→    setEmpMobileIdDisplay('')
+   360→    setCurrentPage('employee-profile')
+   361→  }
+   362→
+   363→  const handleGoToEmployeeEditRights = () => {
+   364→    setEmpMobileIdDisplay('')
+   365→    setCurrentPage('employee-edit-rights')
+   366→  }
+   367→
+   368→  const handleEmpMobileIdCheck = () => {
+   369→    if (empMobileIdDisplay) {
+   370→      setEmpPushTimer(10)
+   371→      setShowEmpPushDialog(true)
+   372→    }
+   373→  }
+   374→
+   375→  const handleEmpPushCancel = () => {
+   376→    setShowEmpPushDialog(false)
+   377→    showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
+   378→    setEmpMobileIdDisplay('')
+   379→  }
+   380→
+   381→  const handleEmpPushResend = () => {
+   382→    setEmpPushTimer(10)
+   383→  }
+   384→
+   385→  const handleEmpPushSimulate = () => {
+   386→    setShowEmpPushDialog(false)
+   387→    setEmpMobileId(empMobileIdDisplay)
+   388→    sampleNumbers[selectedEmployeeIdx].mobileId = empMobileIdDisplay
+   389→    setEmpMobileIdFocused(false)
+   390→    showSnackbar('Изменения сохранены')
+   391→  }
+   392→
+   393→  return (
+   394→    <div className="flex min-h-screen bg-white">
+   395→      {/* ─── Sidebar ─────────────────────────────── */}
+   396→      <aside className="w-[72px] min-h-screen bg-white border-r border-gray-200 flex flex-col items-center py-4 gap-1 shrink-0">
+   397→        {sidebarIcons.map((item, idx) => {
+   398→          const Icon = item.icon
+   399→          const isBurger = item.isBurger
+   400→          const isSettings = item.isSettings
+   401→          let buttonClass = ''
+   402→          if (isBurger) {
+   403→            buttonClass = currentPage === 'home'
+   404→              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
+   405→              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+   406→          } else if (isSettings) {
+   407→            buttonClass = currentPage === 'settings'
+   408→              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'
+   409→              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+   410→          } else {
+   411→            buttonClass = 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+   412→          }
+   413→          return (
+   414→            <button
+   415→              key={idx}
+   416→              onClick={() => {
+   417→                if (isBurger || item.label === 'Пользователи') setCurrentPage('home')
+   418→                if (isSettings) setCurrentPage('settings')
+   419→              }}
+   420→              className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${buttonClass}`}
+   421→              title={item.label}
+   422→            >
+   423→              <Icon size={20} strokeWidth={1.8} />
+   424→            </button>
+   425→          )
+   426→        })}
+   427→      </aside>
+   428→
+   429→      {/* ─── Main Area ──────────────────────────── */}
+   430→      <div className="flex-1 flex flex-col min-h-screen">
+   431→        {/* ─── Header ──────────────────────────── */}
+   432→        <header className="h-16 border-b border-gray-200 flex items-center justify-between px-8 bg-white shrink-0">
+   433→          {/* Logo */}
+   434→          <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+   435→            <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
+   436→              <span className="text-white text-xs font-bold">Л</span>
+   437→            </div>
+   438→            <span className="text-base font-bold text-gray-900 tracking-tight">логотип</span>
+   439→          </button>
+   440→
+   441→          {/* Right icons */}
+   442→          <div className="flex items-center gap-4">
+   443→            <button className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+   444→              <Moon size={20} strokeWidth={1.8} />
+   445→            </button>
+   446→
+   447→            {/* Notifications */}
+   448→            <div ref={notifRef} className="relative">
+   449→              <button
+   450→                onClick={handleBellClick}
+   451→                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+   452→                  notificationsOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+   453→                }`}
+   454→              >
+   455→                <Bell size={20} strokeWidth={1.8} />
+   456→                {showNotificationBadge && (
+   457→                  <span className="notification-badge absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
+   458→                )}
+   459→              </button>
+   460→
+   461→              {/* ─── Notifications Dropdown ───────────────── */}
+   462→              {notificationsOpen && (
+   463→                <div className="absolute right-0 top-12 w-[420px] bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+   464→                  <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+   465→                    <h3 className="text-base font-semibold text-gray-900">Уведомления</h3>
+   466→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Прочитать все</button>
+   467→                  </div>
+   468→
+   469→                  <div className="p-4 hover:bg-gray-50 transition-colors cursor-pointer relative">
+   470→                    <div className="flex gap-3">
+   471→                      <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+   472→                        <Users size={20} className="text-green-600" strokeWidth={1.8} />
+   473→                      </div>
+   474→                      <div className="flex-1 min-w-0">
+   475→                        <div className="flex items-start justify-between gap-2">
+   476→                          <h4 className="text-sm font-semibold text-gray-900">Новый функционал</h4>
+   477→                          <button className="text-gray-400 hover:text-gray-600 shrink-0 p-0.5 rounded">
+   478→                            <MoreVertical size={16} />
+   479→                          </button>
+   480→                        </div>
+   481→                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+   482→                          Доступен новый способ входа по Mobile ID. Теперь вы можете заходить в личный кабинет без пароля, подтверждая вход Push-уведомлением на своем телефоне.
+   483→                        </p>
+   484→                        <button
+   485→                          onClick={handleGoToProfile}
+   486→                          className="mt-3 text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+   487→                        >
+   488→                          Перейти в профиль
+   489→                        </button>
+   490→                      </div>
+   491→                    </div>
+   492→                  </div>
+   493→
+   494→                  <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+   495→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium w-full text-center">
+   496→                      Все уведомления
+   497→                    </button>
+   498→                  </div>
+   499→                </div>
+   500→              )}
+   501→            </div>
+   502→
+   503→            <button onClick={() => setCurrentPage('settings')} className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+   504→              <Settings size={20} strokeWidth={1.8} />
+   505→            </button>
+   506→
+   507→            <button onClick={() => setCurrentPage('home')} className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+   508→              <User size={20} strokeWidth={1.8} />
+   509→            </button>
+   510→          </div>
+   511→        </header>
+   512→
+   513→        {/* ─── Content ──────────────────────────── */}
+   514→        {currentPage === 'home' ? (
+   515→          /* ═══════════════════════════════════════════════════════
+   516→             HOME PAGE
+   517→             ═══════════════════════════════════════════════════════ */
+   518→          <main className="flex-1 p-8 bg-gray-50/50">
+   519→            <div className="max-w-[1400px] mx-auto">
+   520→              <h1 className="text-2xl font-semibold text-gray-900 mb-8">Ваша АТС</h1>
+   521→
+   522→              {/* ─── Progress Card ──────────────────── */}
+   523→              <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+   524→                <div className="flex items-start gap-6">
+   525→                  {/* Circular progress */}
+   526→                  <div className="shrink-0">
+   527→                    <div
+   528→                      className="w-[88px] h-[88px] rounded-full flex items-center justify-center relative"
+   529→                      style={{
+   530→                        background: `conic-gradient(#7C3AED 0% 25%, #E5E7EB 25% 100%)`,
+   531→                      }}
+   532→                    >
+   533→                      <div className="w-[72px] h-[72px] rounded-full bg-white flex flex-col items-center justify-center">
+   534→                        <span className="text-lg font-bold text-gray-900">25%</span>
+   535→                        <span className="text-[10px] text-gray-500 leading-tight">настроено</span>
+   536→                      </div>
+   537→                    </div>
+   538→                  </div>
+   539→
+   540→                  {/* Center text */}
+   541→                  <div className="flex-1 min-w-0">
+   542→                    <h2 className="text-lg font-semibold text-gray-900">Основные настройки АТС</h2>
+   543→                    <p className="text-sm text-gray-500 mt-1">Осталось 3 шага</p>
+   544→                  </div>
+   545→                </div>
+   546→
+   547→                {/* Action items */}
+   548→                <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
+   549→                  <div className="flex items-center gap-2">
+   550→                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+   551→                      <Check size={14} className="text-blue-600" strokeWidth={2.5} />
+   552→                    </div>
+   553→                    <span className="text-sm text-blue-600 font-medium cursor-pointer hover:underline">Подключить номера сотрудников</span>
+   554→                  </div>
+   555→                  {[
+   556→                    'Подключить многоканальные номера',
+   557→                    'Создать маршрут',
+   558→                    'Подключить запись звонков',
+   559→                  ].map((label, i) => (
+   560→                    <div key={i} className="flex items-center gap-2">
+   561→                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+   562→                        <CirclePlus size={14} className="text-gray-400" strokeWidth={2} />
+   563→                      </div>
+   564→                      <span className="text-sm text-gray-500">{label}</span>
+   565→                    </div>
+   566→                  ))}
+   567→                </div>
+   568→              </div>
+   569→
+   570→              {/* ─── Three Stats Cards ──────────────────── */}
+   571→              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+   572→                {/* Tariff Card */}
+   573→                <div className="bg-white rounded-xl border border-gray-100 p-6">
+   574→                  <div className="flex items-center justify-between mb-5">
+   575→                    <div>
+   576→                      <h3 className="text-sm font-semibold text-gray-900">Стандартный</h3>
+   577→                      <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
+   578→                    </div>
+   579→                    <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors">
+   580→                      <Pencil size={16} strokeWidth={1.8} />
+   581→                    </button>
+   582→                  </div>
+   583→                  <div className="flex justify-between">
+   584→                    <div>
+   585→                      <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
+   586→                      <p className="text-xs text-gray-500 mt-0.5">Пакет</p>
+   587→                    </div>
+   588→                    <div>
+   589→                      <span className="text-base font-semibold text-gray-900">0 ₽</span>
+   590→                      <p className="text-xs text-gray-500 mt-0.5">Сверх пакета</p>
+   591→                    </div>
+   592→                    <div>
+   593→                      <span className="text-base font-semibold text-gray-900">3 490 ₽</span>
+   594→                      <p className="text-xs text-gray-500 mt-0.5">Итого</p>
+   595→                    </div>
+   596→                  </div>
+   597→                  <button className="mt-4 w-full px-4 py-2 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+   598→                    Открыть счета
+   599→                  </button>
+   600→                </div>
+   601→
+   602→                {/* Numbers Card */}
+   603→                <div className="bg-white rounded-xl border border-gray-100 p-6">
+   604→                  <h3 className="text-sm font-semibold text-gray-900 mb-1">20 номеров из 20</h3>
+   605→                  {/* Progress bar */}
+   606→                  <div className="w-full h-2 bg-gray-100 rounded-full mt-3 mb-3 overflow-hidden">
+   607→                    <div className="h-full bg-[#7C3AED] rounded-full" style={{ width: '5%' }} />
+   608→                  </div>
+   609→                  <div className="space-y-1.5 mt-4">
+   610→                    <div className="flex items-center gap-2">
+   611→                      <span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED] shrink-0" />
+   612→                      <span className="text-xs text-gray-600">Подключено — 1 номер сотрудников</span>
+   613→                    </div>
+   614→                    <div className="flex items-center gap-2">
+   615→                      <span className="w-2.5 h-2.5 rounded-full bg-gray-300 shrink-0" />
+   616→                      <span className="text-xs text-gray-600">Осталось — 2 многоканальных</span>
+   617→                    </div>
+   618→                  </div>
+   619→                </div>
+   620→
+   621→                {/* Promo Card */}
+   622→                <div className="bg-[#1F1F1F] rounded-xl p-6 text-white">
+   623→                  <h3 className="text-sm font-semibold mb-2">Внешние SIP-номера</h3>
+   624→                  <p className="text-xs text-gray-400 leading-relaxed">
+   625→                    Подключайте внешние SIP-номера для приёма и совершения звонков через вашу АТС из любой точки мира с высокими качеством связи.
+   626→                  </p>
+   627→                  <button className="mt-4 text-sm text-yellow-400 hover:text-yellow-300 font-medium transition-colors">
+   628→                    Смотрите, как это работает &gt;&gt;
+   629→                  </button>
+   630→                </div>
+   631→              </div>
+   632→
+   633→              {/* ─── Number Management Section ──────────── */}
+   634→              <div>
+   635→                <h2 className="text-lg font-semibold text-gray-900 mb-6">Управление номерами</h2>
+   636→
+   637→                {/* Tabs */}
+   638→                <div className="flex gap-8 border-b border-gray-200 mb-6">
+   639→                  {['Номера сотрудников', 'Многоканальные номера'].map((tab, idx) => (
+   640→                    <button
+   641→                      key={idx}
+   642→                      onClick={() => setHomeNumberTab(idx)}
+   643→                      className={`pb-3 text-sm font-medium transition-colors relative ${
+   644→                        homeNumberTab === idx
+   645→                          ? 'text-gray-900 font-semibold'
+   646→                          : 'text-gray-500 hover:text-gray-700'
+   647→                      }`}
+   648→                    >
+   649→                      {tab}
+   650→                      {homeNumberTab === idx && (
+   651→                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400 rounded-full" />
+   652→                      )}
+   653→                    </button>
+   654→                  ))}
+   655→                </div>
+   656→
+   657→                {/* Toolbar */}
+   658→                <div className="flex items-center gap-3 mb-4">
+   659→                  <div className="flex items-center gap-3 flex-1">
+   660→                    <div className="relative w-[240px]">
+   661→                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+   662→                      <input
+   663→                        type="text"
+   664→                        value={searchQuery}
+   665→                        onChange={(e) => setSearchQuery(e.target.value)}
+   666→                        placeholder="Поиск"
+   667→                        className="w-full h-9 pl-9 pr-4 bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-colors placeholder:text-gray-400"
+   668→                      />
+   669→                    </div>
+   670→                    <div className="relative">
+   671→                      <select className="h-9 px-3 pr-8 bg-gray-100 rounded-lg text-sm text-gray-700 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
+   672→                        <option>Везде</option>
+   673→                        <option>Номер</option>
+   674→                        <option>Имя</option>
+   675→                        <option>Подразделение</option>
+   676→                      </select>
+   677→                      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+   678→                    </div>
+   679→                    <button className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200">
+   680→                      <Filter size={16} strokeWidth={1.8} />
+   681→                    </button>
+   682→                  </div>
+   683→                  <div className="flex items-center gap-3">
+   684→                    <button className="h-9 px-3 flex items-center gap-1.5 rounded-lg text-sm text-gray-700 font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+   685→                      <Download size={14} strokeWidth={1.8} />
+   686→                      Импорт
+   687→                    </button>
+   688→                    <button className="h-9 px-4 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg hover:bg-yellow-400 transition-colors">
+   689→                      + Добавить номера
+   690→                    </button>
+   691→                  </div>
+   692→                </div>
+   693→
+   694→                {/* Table */}
+   695→                <div className="bg-white rounded-xl border border-gray-100">
+   696→                  <table className="w-full table-fixed">
+   697→                    <colgroup>
+   698→                      <col className="w-10" />
+   699→                      <col style={{ width: 174 }} />
+   700→                      <col />
+   701→                      <col />
+   702→                      <col />
+   703→                      <col />
+   704→                      <col />
+   705→                      <col />
+   706→                      <col />
+   707→                      <col />
+   708→                      <col className="w-10" />
+   709→                    </colgroup>
+   710→                    <thead>
+   711→                      <tr className="border-b border-gray-100">
+   712→                        <th className="px-4 py-3">
+   713→                          <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+   714→                        </th>
+   715→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Номер</th>
+   716→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Имя</th>
+   717→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Короткий</th>
+   718→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Статус SIP</th>
+   719→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Доступно, мин</th>
+   720→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Подразделение</th>
+   721→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Роль</th>
+   722→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Договор</th>
+   723→                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900">Услуги</th>
+   724→                        <th className="px-4 py-3"></th>
+   725→                      </tr>
+   726→                    </thead>
+   727→                    <tbody>
+   728→                      {sampleNumbers.map((row, i) => (
+   729→                        <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+   730→                          <td className="px-4 py-3">
+   731→                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+   732→                          </td>
+   733→                          <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">
+   734→                            <button
+   735→                              onClick={() => handleGoToEmployeeProfile(i)}
+   736→                              className="text-left hover:text-blue-500 transition-colors"
+   737→                            >
+   738→                              {row.number}
+   739→                            </button>
+   740→                          </td>
+   741→                          <td className="px-4 py-3 text-sm text-gray-700">{row.name}</td>
+   742→                          <td className="px-4 py-3 text-sm text-gray-700">{row.short}</td>
+   743→                          <td className="px-4 py-3">
+   744→                            {row.sip === 'Online' ? (
+   745→                              <span className="inline-flex w-6 h-6 rounded-full bg-green-100 items-center justify-center">
+   746→                                <Check size={14} className="text-green-600" strokeWidth={2.5} />
+   747→                              </span>
+   748→                            ) : (
+   749→                              <span className="inline-flex w-6 h-6 rounded-full bg-red-100 items-center justify-center">
+   750→                                <X size={14} className="text-red-500" strokeWidth={2.5} />
+   751→                              </span>
+   752→                            )}
+   753→                          </td>
+   754→                          <td className="px-4 py-3 text-sm text-gray-700">{row.minutes}</td>
+   755→                          <td className="px-4 py-3 text-sm text-gray-700">{row.dept}</td>
+   756→                          <td className="px-4 py-3 text-sm text-gray-700">{row.role}</td>
+   757→                          <td className="px-4 py-3 text-sm text-gray-500">{row.contract}</td>
+   758→                          <td className="px-4 py-3">
+   759→                            <div className="flex items-center gap-1.5">
+   760→                              {row.services.includes('recording') && (
+   761→                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Запись разговора">
+   762→                                  <Mic size={15} className="text-gray-600" strokeWidth={1.8} />
+   763→                                </span>
+   764→                              )}
+   765→                              {row.services.includes('callcenter') && (
+   766→                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Колл-центр">
+   767→                                  <Headphones size={15} className="text-gray-600" strokeWidth={1.8} />
+   768→                                </span>
+   769→                              )}
+   770→                              {row.services.includes('voicemail') && (
+   771→                                <span className="inline-flex w-7 h-7 rounded-lg bg-gray-100 items-center justify-center" title="Голосовая почта">
+   772→                                  <Voicemail size={15} className="text-gray-600" strokeWidth={1.8} />
+   773→                                </span>
+   774→                              )}
+   775→                              {row.services.length === 0 && <span className="text-sm text-gray-400">—</span>}
+   776→                            </div>
+   777→                          </td>
+   778→                          <td className="px-4 py-3">
+   779→                            <button className="text-gray-400 hover:text-gray-600 transition-colors">
+   780→                              <MoreVertical size={16} />
+   781→                            </button>
+   782→                          </td>
+   783→                        </tr>
+   784→                      ))}
+   785→                    </tbody>
+   786→                  </table>
+   787→                </div>
+   788→              </div>
+   789→            </div>
+   790→          </main>
+   791→        ) : currentPage === 'settings' ? (
+   792→          /* ═══════════════════════════════════════════════════════
+   793→             SETTINGS PAGE
+   794→             ═══════════════════════════════════════════════════════ */
+   795→          <main className="flex-1 p-8 bg-gray-50/50">
+   796→            <div className="max-w-[1400px] mx-auto">
+   797→              <h1 className="text-2xl font-semibold text-gray-900 mb-8">Настройки АТС</h1>
+   798→
+   799→              {/* ─── Tabs ──────────────────────────── */}
+   800→              <div className="flex gap-8 border-b border-gray-200 mb-8">
+   801→                {tabs.map((tab, idx) => (
+   802→                  <button
+   803→                    key={idx}
+   804→                    onClick={() => setActiveTab(idx)}
+   805→                    className={`pb-3 text-sm font-medium transition-colors relative ${
+   806→                      activeTab === idx
+   807→                        ? 'text-gray-900 font-semibold'
+   808→                        : 'text-gray-500 hover:text-gray-700'
+   809→                    }`}
+   810→                  >
+   811→                    {tab}
+   812→                    {activeTab === idx && (
+   813→                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400 rounded-full" />
+   814→                    )}
+   815→                  </button>
+   816→                ))}
+   817→              </div>
+   818→
+   819→              {/* Section header */}
+   820→              <div className="flex items-center justify-between mb-6">
+   821→                <h2 className="text-lg font-semibold text-gray-900">Профиль компании</h2>
+   822→                <div className="relative" ref={howItWorksRef}>
+   823→                  <button
+   824→                    onClick={() => { setHowItWorksOpen(!howItWorksOpen); setHowItWorksStep(0) }}
+   825→                    className="text-sm text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+   826→                  >
+   827→                    Как это работает
+   828→                    <CircleHelp size={15} strokeWidth={1.8} />
+   829→                  </button>
+   830→
+   831→                  {/* ─── Popover: Как это работает (2 slides) ────────── */}
+   832→                  {howItWorksOpen && (
+   833→                    <div className="absolute right-0 top-[44px] w-[360px] bg-[#1F1F1F] rounded-lg z-50 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+   834→                      {/* Arrow */}
+   835→                      <div className="absolute -top-[6px] right-[40px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   836→
+   837→                      {/* Header */}
+   838→                      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+   839→                        <h4 className="text-[15px] font-semibold text-white">{howItWorksSteps[howItWorksStep].title}</h4>
+   840→                        <button
+   841→                          onClick={() => setHowItWorksOpen(false)}
+   842→                          className="text-gray-500 hover:text-gray-300 transition-colors"
+   843→                        >
+   844→                          <X size={16} strokeWidth={2} />
+   845→                        </button>
+   846→                      </div>
+   847→
+   848→                      {/* Body */}
+   849→                      <div className="px-5 pb-5">
+   850→                        <div className="overflow-hidden">
+   851→                          <div
+   852→                            className="flex transition-transform duration-300 ease-in-out"
+   853→                            style={{ transform: `translateX(-${howItWorksStep * 100}%)` }}
+   854→                          >
+   855→                            {howItWorksSteps.map((step, idx) => (
+   856→                              <div key={idx} className="w-full shrink-0">
+   857→                                {'text' in step && (
+   858→                                  <p className="text-[13px] leading-[1.5] text-gray-400">
+   859→                                    {step.text}
+   860→                                  </p>
+   861→                                )}
+   862→                                {'paragraphs' in step && step.paragraphs && (
+   863→                                  <>
+   864→                                    {step.paragraphs.map((p, pIdx) => (
+   865→                                      <p key={pIdx} className={`text-[13px] leading-[1.5] text-gray-400 ${pIdx > 0 ? 'mt-3' : ''}`}>
+   866→                                        {p}
+   867→                                      </p>
+   868→                                    ))}
+   869→                                  </>
+   870→                                )}
+   871→                              </div>
+   872→                            ))}
+   873→                          </div>
+   874→                        </div>
+   875→
+   876→                        {/* Footer */}
+   877→                        <div className="flex items-center justify-between mt-5">
+   878→                          {/* Dots */}
+   879→                          <div className="flex gap-1.5">
+   880→                            {howItWorksSteps.map((_, idx) => (
+   881→                              <span
+   882→                                key={idx}
+   883→                                className={`w-1.5 h-1.5 rounded-full transition-colors ${
+   884→                                  idx === howItWorksStep ? 'bg-white' : 'bg-gray-600'
+   885→                                }`}
+   886→                              />
+   887→                            ))}
+   888→                          </div>
+   889→
+   890→                          {/* Navigation button */}
+   891→                          {howItWorksStep === 0 ? (
+   892→                            <button
+   893→                              onClick={() => setHowItWorksStep(1)}
+   894→                              className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+   895→                            >
+   896→                              Далее
+   897→                            </button>
+   898→                          ) : (
+   899→                            <button
+   900→                              onClick={() => setHowItWorksStep(0)}
+   901→                              className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+   902→                            >
+   903→                              Назад
+   904→                            </button>
+   905→                          )}
+   906→                        </div>
+   907→                      </div>
+   908→                    </div>
+   909→                  )}
+   910→                </div>
+   911→              </div>
+   912→
+   913→              {/* ─── 3 Cards Grid ────────────────────── */}
+   914→              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+   915→
+   916→                {/* ─── Card 1: Данные о компании ──── */}
+   917→                <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+   918→                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Данные о компании</h3>
+   919→
+   920→                  <div className="space-y-4">
+   921→                    <FloatingInput
+   922→                      label="Название компании"
+   923→                      value={card1CompanyName}
+   924→                      onChange={markCard1Dirty}
+   925→                      placeholder="Название компании"
+   926→                    />
+   927→                  </div>
+   928→
+   929→                  <div className="mt-5 flex justify-end">
+   930→                    <button
+   931→                      className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+   932→                        card1CanSave
+   933→                          ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+   934→                          : 'cursor-not-allowed opacity-40'
+   935→                      }`}
+   936→                      disabled={!card1CanSave}
+   937→                      onClick={handleSave1}
+   938→                    >
+   939→                      Сохранить
+   940→                    </button>
+   941→                  </div>
+   942→                </div>
+   943→
+   944→                {/* ─── Card 2: Контактные данные ───── */}
+   945→                <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+   946→                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Контактные данные</h3>
+   947→
+   948→                  <div className="space-y-4">
+   949→                    <FloatingInput
+   950→                      label="Фамилия Имя Отчество*"
+   951→                      value={card2Fio}
+   952→                      onChange={markCard2Dirty}
+   953→                      placeholder="Фамилия Имя Отчество*"
+   954→                    />
+   955→                    <div className="relative" ref={phonePopoverRef}>
+   956→                      <FloatingInput
+   957→                        label="Номер телефона *"
+   958→                        value={card2Phone}
+   959→                        onChange={markCard2PhoneDirty}
+   960→                        placeholder="Номер телефона *"
+   961→                        rightIcon
+   962→                        mask="phone"
+   963→                      />
+   964→                      <button
+   965→                        onClick={() => setPhonePopoverOpen(!phonePopoverOpen)}
+   966→                        className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${phonePopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+   967→                      >
+   968→                        <Info size={18} />
+   969→                      </button>
+   970→
+   971→                      {/* ─── Popover: Номер телефона ────────── */}
+   972→                      {phonePopoverOpen && (
+   973→                        <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+   974→                          <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+   975→                          <p className="text-[13px] leading-[1.5] text-gray-200">
+   976→                            Номер не должен содержать буквы и превышать 18 символов (формат +7 XXX XXX-XX-XX для российских номеров). Для международных номеров необходимо ввести код страны после префикса &quot;+&quot;.
+   977→                          </p>
+   978→                        </div>
+   979→                      )}
+   980→                    </div>
+   981→                    <FloatingInput
+   982→                      label="Контактная почта"
+   983→                      value={card2Email}
+   984→                      onChange={markCard2EmailDirty}
+   985→                      placeholder="Контактная почта"
+   986→                      type="email"
+   987→                    />
+   988→
+   989→                    {/* Checkbox */}
+   990→                    <div className="flex items-start gap-3 pt-1">
+   991→                      <button
+   992→                        onClick={() => { setCheckboxConsent(!checkboxConsent); setCard2Dirty(true) }}
+   993→                        className={`w-[18px] h-[18px] rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors border ${
+   994→                          checkboxConsent
+   995→                            ? 'bg-yellow-300 border-yellow-500'
+   996→                            : 'bg-white border-gray-300'
+   997→                        }`}
+   998→                      >
+   999→                        {checkboxConsent && <Check size={12} className="text-gray-900" strokeWidth={3} />}
+  1000→                      </button>
+  1001→                      <span className="text-sm text-gray-700 leading-relaxed">
+  1002→                        Соглашаюсь на <a href="#" className="text-blue-500 hover:text-blue-600">обработку данных</a> и получение уведомлений
+  1003→                        <span className="relative inline-flex ml-1 align-middle" ref={consentPopoverRef}>
+  1004→                          <button
+  1005→                            onClick={() => setConsentPopoverOpen(!consentPopoverOpen)}
+  1006→                            className={`transition-colors ${consentPopoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+  1007→                          >
+  1008→                            <Info size={14} />
+  1009→                          </button>
+  1010→
+  1011→                          {/* ─── Popover: Согласие на обработку данных ────────── */}
+  1012→                          {consentPopoverOpen && (
+  1013→                            <div className="absolute left-1/2 -translate-x-1/2 top-[22px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+  1014→                              <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+  1015→                              <p className="text-[13px] leading-[1.5] text-gray-200">
+  1016→                                Вы будете получать уведомления об обновлении сервиса, событиях вашей АТС, системные уведомления
+  1017→                              </p>
+  1018→                            </div>
+  1019→                          )}
+  1020→                        </span>
+  1021→                      </span>
+  1022→                    </div>
+  1023→                  </div>
+  1024→
+  1025→                  <div className="mt-5 flex justify-end">
+  1026→                    <button
+  1027→                      className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+  1028→                        card2CanSave
+  1029→                          ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+  1030→                          : 'cursor-not-allowed opacity-40'
+  1031→                      }`}
+  1032→                      disabled={!card2CanSave}
+  1033→                      onClick={handleSave2}
+  1034→                    >
+  1035→                      Сохранить
+  1036→                    </button>
+  1037→                  </div>
+  1038→                </div>
+  1039→
+  1040→                {/* ─── Card 3: Права доступа ────────── */}
+  1041→                <div className="settings-card bg-white rounded-xl border border-gray-100 p-6">
+  1042→                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
+  1043→
+  1044→                  <div className="space-y-4">
+  1045→                    <FloatingInput
+  1046→                      label="Почта для получения пароля*"
+  1047→                      value={card3PasswordEmail}
+  1048→                      onChange={markCard3EmailDirty}
+  1049→                      placeholder="Почта для получения пароля*"
+  1050→                      type="email"
+  1051→                    />
+  1052→
+  1053→                    <div className="relative" ref={popoverRef}>
+  1054→                      <FloatingInput
+  1055→                        label="Личный номер для входа по Mobile ID"
+  1056→                        value={card3MobileId}
+  1057→                        onChange={markCard3MobileIdDirty}
+  1058→                        placeholder="Личный номер для входа по Mobile ID"
+  1059→                        rightIcon
+  1060→                        mask="phone"
+  1061→                      />
+  1062→                      <button
+  1063→                        onClick={togglePopover}
+  1064→                        className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${popoverOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+  1065→                      >
+  1066→                        <Info size={18} />
+  1067→                      </button>
+  1068→
+  1069→                      {/* ─── Popover: Mobile ID ────────── */}
+  1070→                      {popoverOpen && (
+  1071→                        <div className="absolute right-0 top-[52px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+  1072→                          {/* Arrow */}
+  1073→                          <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+  1074→
+  1075→                          {/* Content */}
+  1076→                          <div className="text-[13px] leading-[1.5] text-gray-200">
+  1077→                            <p>Mobile ID — это защищённый способ входа по номеру телефона без пароля. Мы отправляем Push-уведомление прямо на ваш телефон.</p>
+  1078→
+  1079→                            <ul className="mt-3 space-y-1 pl-1">
+  1080→                              <li className="flex gap-2">
+  1081→                                <span className="shrink-0">•</span>
+  1082→                                <span>введите свой номер телефона при авторизации</span>
+  1083→                              </li>
+  1084→                              <li className="flex gap-2">
+  1085→                                <span className="shrink-0">•</span>
+  1086→                                <span>на телефоне появится Push-уведомление</span>
+  1087→                              </li>
+  1088→                              <li className="flex gap-2">
+  1089→                                <span className="shrink-0">•</span>
+  1090→                                <span>для подтверждения нажмите «Разрешить»</span>
+  1091→                              </li>
+  1092→                            </ul>
+  1093→
+  1094→                            <p className="mt-3">
+  1095→                              Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придет SMS со ссылкой для подтверждения
+  1096→                            </p>
+  1097→                          </div>
+  1098→                        </div>
+  1099→                      )}
+  1100→                    </div>
+  1101→
+  1102→                    {/* Toggle 2FA */}
+  1103→                    <div className="flex items-start gap-3 pt-2">
+  1104→                      <div
+  1105→                        onClick={handleToggle2FA}
+  1106→                        className={`toggle-track shrink-0 mt-0.5 ${toggle2FA ? 'active' : ''}`}
+  1107→                      >
+  1108→                        <div className="toggle-thumb" />
+  1109→                      </div>
+  1110→                      <div>
+  1111→                        <p className="text-sm font-medium text-gray-900">Двухфакторная аутентификация</p>
+  1112→                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+  1113→                          Вам будет отправляться проверочный код для входа – это дополнительная защита вашего аккаунта
+  1114→                        </p>
+  1115→                      </div>
+  1116→                    </div>
+  1117→
+  1118→                    {/* Buttons row */}
+  1119→                    <div className="flex items-center justify-between pt-1">
+  1120→                      <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+  1121→                        Изменить пароль
+  1122→                      </button>
+  1123→                      <button
+  1124→                        className={`px-6 py-2.5 bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg transition-all ${
+  1125→                          card3CanSave
+  1126→                            ? 'hover:bg-yellow-400 cursor-pointer opacity-100'
+  1127→                            : 'cursor-not-allowed opacity-40'
+  1128→                        }`}
+  1129→                        disabled={!card3CanSave}
+  1130→                        onClick={handleSave3}
+  1131→                      >
+  1132→                        Сохранить
+  1133→                      </button>
+  1134→                    </div>
+  1135→                  </div>
+  1136→                </div>
+  1137→              </div>
+  1138→            </div>
+  1139→          </main>
+  1140→        ) : currentPage === 'employee-profile' ? (
+  1141→          /* ═══════════════════════════════════════════════════════
+  1142→             EMPLOYEE PROFILE PAGE
+  1143→             ═══════════════════════════════════════════════════════ */
+  1144→          <main className="flex-1 p-8 bg-gray-50/50">
+  1145→            <div className="max-w-[1400px] mx-auto">
+  1146→              {/* Breadcrumb */}
+  1147→              <nav className="flex items-center gap-1.5 text-sm mb-6">
+  1148→                <button onClick={() => setCurrentPage('home')} className="text-gray-500 hover:text-gray-700 transition-colors">Номера</button>
+  1149→                <ChevronRight size={14} className="text-gray-400" />
+  1150→                <span className="text-gray-900 font-medium">Профиль {emp.number}</span>
+  1151→              </nav>
+  1152→
+  1153→              {/* Profile header */}
+  1154→              <div className="flex items-center justify-between mb-8">
+  1155→                <div className="flex items-center gap-4">
+  1156→                  <h1 className="text-2xl font-semibold text-gray-900">Профиль {emp.number}</h1>
+  1157→                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+  1158→                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+  1159→                    Активен
+  1160→                  </span>
+  1161→                </div>
+  1162→                <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+  1163→                  <Trash2 size={16} strokeWidth={1.8} />
+  1164→                  Удалить сотрудника
+  1165→                </button>
+  1166→              </div>
+  1167→              <p className="text-sm text-gray-500 -mt-6 mb-8">{emp.name}</p>
+  1168→
+  1169→              {/* ─── Two cards row ──────────────────── */}
+  1170→              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  1171→
+  1172→                {/* Card: Контактные данные */}
+  1173→                <div className="bg-white rounded-xl border border-gray-100 p-6">
+  1174→                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Контактные данные</h3>
+  1175→                  <div className="space-y-4">
+  1176→                    <div className="flex items-center justify-between">
+  1177→                      <span className="text-sm text-gray-500">Телефон</span>
+  1178→                      <span className="text-sm text-gray-900 font-medium">{empShortNumber.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2-$3-$4')}</span>
+  1179→                    </div>
+  1180→                    <div className="flex items-center justify-between">
+  1181→                      <span className="text-sm text-gray-500">Короткий номер</span>
+  1182→                      <span className="text-sm text-gray-900">{emp.short}</span>
+  1183→                    </div>
+  1184→                    <div className="flex items-center justify-between">
+  1185→                      <span className="text-sm text-gray-500">Имя и фамилия</span>
+  1186→                      <span className="text-sm text-gray-900">{emp.name}</span>
+  1187→                    </div>
+  1188→                    <div className="flex items-center justify-between">
+  1189→                      <span className="text-sm text-gray-500">Контактная почта</span>
+  1190→                      <div className="flex items-center gap-1.5">
+  1191→                        <span className="text-sm text-gray-900">{emp.email}</span>
+  1192→                        <Info size={14} className="text-gray-400" />
+  1193→                      </div>
+  1194→                    </div>
+  1195→                    <div className="flex items-center justify-between">
+  1196→                      <span className="text-sm text-gray-500">Подразделение</span>
+  1197→                      <span className="text-sm text-gray-900">{emp.dept}</span>
+  1198→                    </div>
+  1199→                    <div className="flex items-center justify-between">
+  1200→                      <span className="text-sm text-gray-500">Должность</span>
+  1201→                      <span className="text-sm text-gray-900">{emp.position}</span>
+  1202→                    </div>
+  1203→                  </div>
+  1204→                  <div className="mt-5 flex justify-end">
+  1205→                    <button className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+  1206→                      <Pencil size={14} strokeWidth={1.8} />
+  1207→                      Редактировать
+  1208→                    </button>
+  1209→                  </div>
+  1210→                </div>
+  1211→
+  1212→                {/* Card: Права доступа */}
+  1213→                <div className="bg-white rounded-xl border border-gray-100 p-6">
+  1214→                  <h3 className="text-[15px] font-semibold text-gray-900 mb-5">Права доступа</h3>
+  1215→                  <div className="space-y-4">
+  1216→                    <div className="flex items-center justify-between">
+  1217→                      <span className="text-sm text-gray-500">Доступ к личному кабинету</span>
+  1218→                      <span className="text-sm text-gray-900">Включен</span>
+  1219→                    </div>
+  1220→                    <div className="flex items-center justify-between">
+  1221→                      <span className="text-sm text-gray-500">Роль</span>
+  1222→                      <span className="text-sm text-gray-900">{emp.role}</span>
+  1223→                    </div>
+  1224→                    <div className="flex items-center justify-between">
+  1225→                      <span className="text-sm text-gray-500">Двухфакторная аутентификация</span>
+  1226→                      <span className="text-sm text-gray-400">Выключена</span>
+  1227→                    </div>
+  1228→                    <div className="flex items-center justify-between">
+  1229→                      <span className="text-sm text-gray-500">Почта для получения пароля</span>
+  1230→                      <div className="relative" ref={empPopoverEmailRef}>
+  1231→                        <div className="flex items-center gap-1.5">
+  1232→                          <span className="text-sm text-gray-900">{emp.email}</span>
+  1233→                          <button
+  1234→                            onClick={() => setEmpPopoverEmailOpen(!empPopoverEmailOpen)}
+  1235→                            className={`transition-colors ${empPopoverEmailOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+  1236→                          >
+  1237→                            <Info size={14} />
+  1238→                          </button>
+  1239→                        </div>
+  1240→                        {empPopoverEmailOpen && (
+  1241→                          <div className="absolute right-0 top-[22px] w-[320px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+  1242→                            <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+  1243→                            <p className="text-[13px] leading-[1.5] text-gray-200">
+  1244→                              На эту почту будут отправляться ссылки для сброса пароля при входе в личный кабинет АТС
+  1245→                            </p>
+  1246→                          </div>
+  1247→                        )}
+  1248→                      </div>
+  1249→                    </div>
+  1250→                    <div className="flex items-center justify-between">
+  1251→                      <span className="text-sm text-gray-500">Номер для входа по Mobile ID</span>
+  1252→                      <div className="relative" ref={empPopoverMobileIdRef}>
+  1253→                        <div className="flex items-center gap-1.5">
+  1254→                          <span className="text-sm text-gray-400">{empMobileId ? formatPhoneMask(empMobileId) : '—'}</span>
+  1255→                          <button
+  1256→                            onClick={() => setEmpPopoverMobileIdOpen(!empPopoverMobileIdOpen)}
+  1257→                            className={`transition-colors ${empPopoverMobileIdOpen ? 'text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
+  1258→                          >
+  1259→                            <Info size={14} />
+  1260→                          </button>
+  1261→                        </div>
+  1262→                        {empPopoverMobileIdOpen && (
+  1263→                          <div className="absolute right-0 top-[22px] w-[340px] bg-[#1F1F1F] text-white rounded-lg p-4 z-50 shadow-lg">
+  1264→                            <div className="absolute -top-[6px] right-[12px] w-3 h-3 bg-[#1F1F1F] rotate-45 rounded-[1px]" />
+  1265→                            <div className="text-[13px] leading-[1.5] text-gray-200">
+  1266→                              <p>Mobile ID — это защищённый способ входа по номеру телефона без пароля. Мы отправляем Push-уведомление прямо на телефон.</p>
+  1267→                              <ul className="mt-3 space-y-1 pl-1">
+  1268→                                <li className="flex gap-2"><span className="shrink-0">•</span><span>введите свой номер телефона при авторизации</span></li>
+  1269→                                <li className="flex gap-2"><span className="shrink-0">•</span><span>на телефоне появится Push-уведомление</span></li>
+  1270→                                <li className="flex gap-2"><span className="shrink-0">•</span><span>для подтверждения нажмите «Разрешить»</span></li>
+  1271→                              </ul>
+  1272→                              <p className="mt-3">
+  1273→                                Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придет SMS со ссылкой для подтверждения
+  1274→                              </p>
+  1275→                            </div>
+  1276→                          </div>
+  1277→                        )}
+  1278→                      </div>
+  1279→                    </div>
+  1280→                  </div>
+  1281→                  <div className="mt-5 flex justify-end gap-3">
+  1282→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200">
+  1283→                      Сбросить пароль
+  1284→                    </button>
+  1285→                    <button
+  1286→                      onClick={handleGoToEmployeeEditRights}
+  1287→                      className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 hover:shadow-[0_2px_8px_rgba(0,102,204,0.12)] transition-all duration-200"
+  1288→                    >
+  1289→                      <Pencil size={14} strokeWidth={1.8} />
+  1290→                      Редактировать
+  1291→                    </button>
+  1292→                  </div>
+  1293→                </div>
+  1294→              </div>
+  1295→
+  1296→              {/* ─── Настройки сотрудника ──────────── */}
+  1297→              <h2 className="text-lg font-semibold text-gray-900 mb-6">Настройки сотрудника</h2>
+  1298→              <div className="space-y-4 mb-8">
+  1299→                {[
+  1300→                  { on: true, title: 'Активация SIP', desc: 'Принимайте и совершайте звонки через интернет' },
+  1301→                  { on: false, title: 'Переадресация', desc: 'Переводите входящие звонки на другой номер' },
+  1302→                  { on: false, title: 'Чёрные и белые списки', desc: 'Списки запрещенных и разрешенных абонентов' },
+  1303→                  { on: false, title: 'Голосовая почта', desc: 'Автоответчик сотрудника' },
+  1304→                ].map((item, i) => (
+  1305→                  <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 flex items-center justify-between">
+  1306→                    <div className="flex items-center gap-4">
+  1307→                      <div
+  1308→                        className={`toggle-track shrink-0 ${item.on ? 'active' : ''}`}
+  1309→                      >
+  1310→                        <div className="toggle-thumb" />
+  1311→                      </div>
+  1312→                      <div>
+  1313→                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
+  1314→                        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
+  1315→                      </div>
+  1316→                    </div>
+  1317→                    <button className="text-sm text-blue-500 hover:text-blue-600 font-medium">Настроить</button>
+  1318→                  </div>
+  1319→                ))}
+  1320→              </div>
+  1321→
+  1322→              {/* ─── Услуги ──────────────────── */}
+  1323→              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+  1324→                Услуги, к которым подключен сотрудник{emp.services.length > 0 && ` (${emp.services.length})`}
+  1325→              </h2>
+  1326→              <div className="bg-white rounded-xl border border-gray-100 overflow-x-auto">
+  1327→                <table className="w-full">
+  1328→                  <thead>
+  1329→                    <tr className="border-b border-gray-100">
+  1330→                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Тип услуги</th>
+  1331→                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Название услуги</th>
+  1332→                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-900">Многоканальный номер</th>
+  1333→                      <th className="w-10 px-5 py-3"></th>
+  1334→                    </tr>
+  1335→                  </thead>
+  1336→                  <tbody>
+  1337→                    {emp.services.length === 0 && (
+  1338→                      <tr><td colSpan={4} className="px-5 py-8 text-sm text-gray-400 text-center">Нет подключенных услуг</td></tr>
+  1339→                    )}
+  1340→                    {emp.services.includes('recording') && (
+  1341→                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+  1342→                        <td className="px-5 py-3 text-sm text-gray-700">Запись разговора</td>
+  1343→                        <td className="px-5 py-3 text-sm text-gray-700">Запись разговоров</td>
+  1344→                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+  1345→                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+  1346→                      </tr>
+  1347→                    )}
+  1348→                    {emp.services.includes('voicemail') && (
+  1349→                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+  1350→                        <td className="px-5 py-3 text-sm text-gray-700">Голосовая почта</td>
+  1351→                        <td className="px-5 py-3 text-sm text-gray-700">Голосовая почта</td>
+  1352→                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+  1353→                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+  1354→                      </tr>
+  1355→                    )}
+  1356→                    {emp.services.includes('callcenter') && (
+  1357→                      <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+  1358→                        <td className="px-5 py-3"><Headphones size={16} className="text-gray-600" /></td>
+  1359→                        <td className="px-5 py-3 text-sm text-gray-700">Колл-центр</td>
+  1360→                        <td className="px-5 py-3 text-sm text-gray-900 font-medium">{emp.number}</td>
+  1361→                        <td className="px-5 py-3"><Info size={16} className="text-gray-400" /></td>
+  1362→                      </tr>
+  1363→                    )}
+  1364→                  </tbody>
+  1365→                </table>
+  1366→              </div>
+  1367→            </div>
+  1368→          </main>
+  1369→        ) : currentPage === 'employee-edit-rights' ? (
+  1370→          /* ═══════════════════════════════════════════════════════
+  1371→             EMPLOYEE EDIT RIGHTS PAGE
+  1372→             ═══════════════════════════════════════════════════════ */
+  1373→          <main className="flex-1 p-8 bg-gray-50/50">
+  1374→            <div className="max-w-[1400px] mx-auto">
+  1375→              {/* Breadcrumb */}
+  1376→              <nav className="flex items-center gap-1.5 text-sm mb-6">
+  1377→                <button onClick={() => setCurrentPage('home')} className="text-gray-500 hover:text-gray-700 transition-colors">Номера</button>
+  1378→                <ChevronRight size={14} className="text-gray-400" />
+  1379→                <button onClick={() => setCurrentPage('employee-profile')} className="text-gray-500 hover:text-gray-700 transition-colors">Профиль {emp.number}</button>
+  1380→                <ChevronRight size={14} className="text-gray-400" />
+  1381→                <span className="text-gray-900 font-medium">Права доступа</span>
+  1382→              </nav>
+  1383→
+  1384→              {/* Page header */}
+  1385→              <h1 className="text-2xl font-semibold text-gray-900 mb-1">Права доступа профиля {emp.number}</h1>
+  1386→              <p className="text-sm text-gray-500 mb-8">{emp.name}</p>
+  1387→
+  1388→              <div className="max-w-[640px]">
+  1389→                {/* Email field (read-only display) */}
+  1390→                <div className="mb-6">
+  1391→                  <div className="relative" ref={empPopoverEmailRef}>
+  1392→                    <FloatingInput
+  1393→                      label="Почта для получения пароля*"
+  1394→                      value={emp.email}
+  1395→                      readOnly
+  1396→                      rightIcon
+  1397→                    />
+  1398→                    <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+  1399→                      <Pencil size={16} strokeWidth={1.8} />
+  1400→                    </button>
+  1401→                  </div>
+  1402→                  <p className="mt-1.5 text-xs text-gray-500">Используется для доступа в ОАТС</p>
+  1403→                </div>
+  1404→
+  1405→                {/* Mobile ID inline edit */}
+  1406→                <div className="mb-6">
+  1407→                  <div className="relative">
+  1408→                    <div
+  1409→                      className={`w-full h-[48px] px-4 ${empMobileIdFocused ? 'pr-20' : 'pr-10'} bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus-within:border-gray-900 focus-within:bg-white flex items-center transition-colors ${empMobileIdDisplay ? 'pt-[12px]' : ''}`}
+  1410→                    >
+  1411→                      {empMobileIdDisplay && (
+  1412→                        <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+  1413→                          Личный номер для входа Mobile ID
+  1414→                        </span>
+  1415→                      )}
+  1416→                      <input
+  1417→                        type="text"
+  1418→                        value={formatPhoneMask(empMobileIdDisplay)}
+  1419→                        onChange={(e) => {
+  1420→                          const digits = e.target.value.replace(/\D/g, '')
+  1421→                          const raw = digits.length > 0 && (digits[0] === '7' || digits[0] === '8') ? digits.slice(1) : digits
+  1422→                          setEmpMobileIdDisplay(raw.slice(0, 10))
+  1423→                        }}
+  1424→                        onFocus={() => setEmpMobileIdFocused(true)}
+  1425→                        onBlur={() => setEmpMobileIdFocused(false)}
+  1426→                        placeholder={empMobileIdDisplay ? ' ' : 'Личный номер для входа Mobile ID'}
+  1427→                        className="flex-1 h-full bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
+  1428→                      />
+  1429→                    </div>
+  1430→                    {empMobileIdFocused ? (
+  1431→                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+  1432→                        <button
+  1433→                          onMouseDown={(e) => e.preventDefault()}
+  1434→                          onClick={handleEmpMobileIdCheck}
+  1435→                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-green-50 transition-colors text-green-600"
+  1436→                        >
+  1437→                          <Check size={16} strokeWidth={2} />
+  1438→                        </button>
+  1439→                        <button
+  1440→                          onMouseDown={(e) => e.preventDefault()}
+  1441→                          onClick={() => { setEmpMobileIdDisplay(''); setEmpMobileIdFocused(false) }}
+  1442→                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-400"
+  1443→                        >
+  1444→                          <X size={16} strokeWidth={2} />
+  1445→                        </button>
+  1446→                      </div>
+  1447→                    ) : (
+  1448→                      empMobileIdDisplay && (
+  1449→                        <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+  1450→                          <Pencil size={16} strokeWidth={1.8} />
+  1451→                        </button>
+  1452→                      )
+  1453→                    )}
+  1454→                  </div>
+  1455→                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+  1456→                    На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
+  1457→                  </p>
+  1458→                </div>
+  1459→
+  1460→                {/* Role dropdown */}
+  1461→                <div className="mb-8">
+  1462→                  <div className="relative">
+  1463→                    <select className="w-full h-[48px] px-4 pr-10 pt-[12px] bg-gray-100 rounded-lg text-sm text-gray-900 border-[1.5px] border-transparent focus:border-gray-900 focus:bg-white focus:outline-none appearance-none cursor-pointer">
+  1464→                      <option>Сотрудник</option>
+  1465→                      <option>Администратор</option>
+  1466→                      <option>Оператор</option>
+  1467→                    </select>
+  1468→                    <span className="absolute left-4 top-[8px] text-[10px] text-gray-500 font-medium pointer-events-none leading-none">
+  1469→                      Роль доступа
+  1470→                    </span>
+  1471→                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+  1472→                  </div>
+  1473→                </div>
+  1474→
+  1475→                {/* Toggles */}
+  1476→                <div className="space-y-5 mb-8">
+  1477→                  <div className="flex items-start gap-3">
+  1478→                    <div
+  1479→                      onClick={() => setEmpToggleAccess(!empToggleAccess)}
+  1480→                      className={`toggle-track shrink-0 mt-0.5 ${empToggleAccess ? 'active' : ''}`}
+  1481→                    >
+  1482→                      <div className="toggle-thumb" />
+  1483→                    </div>
+  1484→                    <div className="flex-1">
+  1485→                      <div className="flex items-center gap-2">
+  1486→                        <p className="text-sm font-medium text-gray-900">Разрешить доступ к личному кабинету АТС</p>
+  1487→                        <Info size={14} className="text-gray-400 shrink-0" />
+  1488→                      </div>
+  1489→                    </div>
+  1490→                  </div>
+  1491→                  <div className="flex items-start gap-3">
+  1492→                    <div
+  1493→                      onClick={() => setEmpToggle2FA(!empToggle2FA)}
+  1494→                      className={`toggle-track shrink-0 mt-0.5 ${empToggle2FA ? 'active' : ''}`}
+  1495→                    >
+  1496→                      <div className="toggle-thumb" />
+  1497→                    </div>
+  1498→                    <div className="flex-1">
+  1499→                      <div className="flex items-center gap-2">
+  1500→                        <p className="text-sm font-medium text-gray-900">Включить двухфакторную аутентификацию</p>
+  1501→                        <Info size={14} className="text-gray-400 shrink-0" />
+  1502→                      </div>
+  1503→                    </div>
+  1504→                  </div>
+  1505→                </div>
+  1506→
+  1507→                {/* Close button */}
+  1508→                <button
+  1509→                  onClick={() => setCurrentPage('employee-profile')}
+  1510→                  className="bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg px-6 py-2.5 hover:bg-yellow-400 transition-colors"
+  1511→                >
+  1512→                  Закрыть окно
+  1513→                </button>
+  1514→              </div>
+  1515→            </div>
+  1516→          </main>
+  1517→        ) : null}
+  1518→      </div>
+  1519→
+  1520→      {/* ═══════════════════════════════════════════════════════════
+  1521→          NEW FEATURE DIALOG
+  1522→          ═══════════════════════════════════════════════════════════ */}
+  1523→      {showNewFeatureDialog && (
+  1524→        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
+  1525→          <div className="bg-white rounded-2xl max-w-[520px] w-full mx-4 p-8">
+  1526→            <h3 className="text-lg font-semibold text-gray-900">Новый функционал</h3>
+  1527→
+  1528→            <div className="mt-6 flex items-start gap-4">
+  1529→              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+  1530→                <Smartphone size={22} className="text-green-600" strokeWidth={1.8} />
+  1531→              </div>
+  1532→              <div>
+  1533→                <p className="text-sm text-gray-700 leading-relaxed">
+  1534→                  Mobile ID — это защищённый способ входа по номеру телефона без паролей. Мы отправляем Push-уведомление прямо на ваш телефон.
+  1535→                </p>
+  1536→
+  1537→                <ul className="mt-4 space-y-2">
+  1538→                  <li className="flex gap-2 text-sm text-gray-600">
+  1539→                    <span className="shrink-0">•</span>
+  1540→                    <span>введите свой номер телефона при авторизации</span>
+  1541→                  </li>
+  1542→                  <li className="flex gap-2 text-sm text-gray-600">
+  1543→                    <span className="shrink-0">•</span>
+  1544→                    <span>на телефоне появится Push-уведомление</span>
+  1545→                  </li>
+  1546→                  <li className="flex gap-2 text-sm text-gray-600">
+  1547→                    <span className="shrink-0">•</span>
+  1548→                    <span>для подтверждения нажимайте «Разрешить»</span>
+  1549→                  </li>
+  1550→                </ul>
+  1551→              </div>
+  1552→            </div>
+  1553→
+  1554→            <p className="mt-5 text-xs text-gray-500 leading-relaxed">
+  1555→              Если ваше устройство не поддерживает Push или вы не успели подтвердить вход в течение 30 секунд, вам автоматически придёт SMS со ссылкой для подтверждения
+  1556→            </p>
+  1557→
+  1558→            <div className="mt-6 flex justify-end">
+  1559→              <button
+  1560→                onClick={() => setShowNewFeatureDialog(false)}
+  1561→                className="bg-yellow-300 text-gray-900 text-sm font-medium rounded-lg px-6 py-2.5 hover:bg-yellow-400 transition-colors"
+  1562→              >
+  1563→                Понятно
+  1564→              </button>
+  1565→            </div>
+  1566→          </div>
+  1567→        </div>
+  1568→      )}
+  1569→
+  1570→      {/* ═══════════════════════════════════════════════════════════
+  1571→          PUSH CONFIRMATION DIALOG
+  1572→          ═══════════════════════════════════════════════════════════ */}
+  1573→      {showPushDialog && (
+  1574→        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
+  1575→          <div className="bg-white rounded-2xl max-w-[540px] w-full mx-4 p-8">
+  1576→            <h3 className="text-base font-semibold text-gray-900 leading-snug">
+  1577→              Мы отправили запрос подтверждения на указанный номер {formatPhoneMask(card3MobileId)}
+  1578→            </h3>
+  1579→
+  1580→            <div className="mt-5">
+  1581→              <p className="text-sm text-gray-700 leading-relaxed">
+  1582→                Чтобы использовать этот номер для входа в личный кабинет, откройте уведомление и нажмите «Подтвердить».
+  1583→              </p>
+  1584→              <p className="mt-3 text-sm text-gray-700 leading-relaxed">
+  1585→                Запрос придет в виде Push-уведомления или SMS. Если вы не получили уведомление, отправьте запрос повторно или попробуйте позже.
+  1586→              </p>
+  1587→            </div>
+  1588→
+  1589→            {/* Simulate push confirm */}
+  1590→            <button
+  1591→              onClick={handlePushSimulate}
+  1592→              className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+  1593→            >
+  1594→              ✓ Подтвердить пуш (симуляция)
+  1595→            </button>
+  1596→
+  1597→            <div className="mt-6 flex justify-end gap-3">
+  1598→              <button
+  1599→                onClick={handlePushCancel}
+  1600→                className="border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+  1601→              >
+  1602→                Отменить изменения
+  1603→              </button>
+  1604→              <button
+  1605→                onClick={handlePushResend}
+  1606→                disabled={pushTimer > 0}
+  1607→                className={`bg-yellow-300 text-gray-900 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+  1608→                  pushTimer > 0
+  1609→                    ? 'opacity-40 cursor-not-allowed'
+  1610→                    : 'hover:bg-yellow-400 cursor-pointer'
+  1611→                }`}
+  1612→              >
+  1613→                Отправить повторно: {pushTimer} сек
+  1614→              </button>
+  1615→            </div>
+  1616→          </div>
+  1617→        </div>
+  1618→      )}
+  1619→
+  1620→      {/* ═══════════════════════════════════════════════════════════
+  1621→          EMPLOYEE PUSH CONFIRMATION DIALOG
+  1622→          ═══════════════════════════════════════════════════════════ */}
+  1623→      {showEmpPushDialog && (
+  1624→        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
+  1625→          <div className="bg-white rounded-2xl max-w-[540px] w-full mx-4 p-8">
+  1626→            <h3 className="text-base font-semibold text-gray-900 leading-snug">
+  1627→              Мы отправили запрос подтверждения на указанный номер {formatPhoneMask(empMobileIdDisplay)}
+  1628→            </h3>
+  1629→
+  1630→            <div className="mt-5">
+  1631→              <p className="text-sm text-gray-700 leading-relaxed">
+  1632→                Чтобы использовать этот номер для входа в личный кабинет, откройте уведомление и нажмите «Подтвердить».
+  1633→              </p>
+  1634→              <p className="mt-3 text-sm text-gray-700 leading-relaxed">
+  1635→                Запрос придет в виде Push-уведомления или SMS. Если вы не получили уведомление, отправьте запрос повторно или попробуйте позже.
+  1636→              </p>
+  1637→            </div>
+  1638→
+  1639→            {/* Simulate push confirm */}
+  1640→            <button
+  1641→              onClick={handleEmpPushSimulate}
+  1642→              className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+  1643→            >
+  1644→              ✓ Подтвердить пуш (симуляция)
+  1645→            </button>
+  1646→
+  1647→            {empPushTimer > 0 && (
+  1648→              <p className="mt-4 text-xs text-gray-400">Кнопки станут доступны через {empPushTimer} сек</p>
+  1649→            )}
+  1650→            <div className="mt-4 flex justify-end gap-3">
+  1651→              <button
+  1652→                onClick={handleEmpPushCancel}
+  1653→                disabled={empPushTimer > 0}
+  1654→                className={`border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+  1655→                  empPushTimer > 0
+  1656→                    ? 'opacity-40 cursor-not-allowed'
+  1657→                    : 'cursor-pointer'
+  1658→                }`}
+  1659→              >
+  1660→                Закрыть
+  1661→              </button>
+  1662→              <button
+  1663→                onClick={handleEmpPushResend}
+  1664→                disabled={empPushTimer > 0}
+  1665→                className={`bg-yellow-300 text-gray-900 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+  1666→                  empPushTimer > 0
+  1667→                    ? 'opacity-40 cursor-not-allowed'
+  1668→                    : 'hover:bg-yellow-400 cursor-pointer'
+  1669→                }`}
+  1670→              >
+  1671→                Отправить повторно
+  1672→              </button>
+  1673→            </div>
+  1674→          </div>
+  1675→        </div>
+  1676→      )}
+  1677→
+  1678→      {/* ─── Snackbar ──────────────────────────── */}
+  1679→      <div
+  1680→        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
+  1681→          snackbarOpen
+  1682→            ? 'opacity-100 translate-y-0'
+  1683→            : 'opacity-0 translate-y-4 pointer-events-none'
+  1684→        }`}
+  1685→      >
+  1686→        <div className="bg-[#1F1F1F] text-white text-sm font-medium px-6 py-3 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
+  1687→          {snackbarMessage}
+  1688→        </div>
+  1689→      </div>
+  1690→    </div>
+  1691→  )
+  1692→}
+  1693→

@@ -8,7 +8,7 @@ import {
   Plus, CheckCircle2, Search, ChevronDown, Filter, Download,
   Smartphone, CirclePlus, Mic, Headphones, Voicemail,
   ChevronRight, Trash2, ArrowLeft, Shield, PhoneForwarded,
-  PhoneOff, ListChecks, VoicemailSquare, Hash
+  PhoneOff, ListChecks, VoicemailSquare, Hash, CircleAlert
 } from 'lucide-react'
 
 // ─── Phone Mask Helper ─────────────────────────────
@@ -133,6 +133,7 @@ export default function Home() {
   const [empMobileId, setEmpMobileId] = useState('')
   const [empMobileIdDisplay, setEmpMobileIdDisplay] = useState('')
   const [empMobileIdFocused, setEmpMobileIdFocused] = useState(false)
+  const [empMobileIdError, setEmpMobileIdError] = useState('')
   const [showEmpPushDialog, setShowEmpPushDialog] = useState(false)
   const [empPushTimer, setEmpPushTimer] = useState(30)
   const [empToggleAccess, setEmpToggleAccess] = useState(true)
@@ -162,6 +163,8 @@ export default function Home() {
   // Card 3
   const [card3PasswordEmail, setCard3PasswordEmail] = useState('pasterpanenko@mail.ru')
   const [card3MobileId, setCard3MobileId] = useState('')
+  const card3MobileIdBeforeEdit = useRef('')
+  const [card3MobileIdError, setCard3MobileIdError] = useState('')
   const [card3Dirty, setCard3Dirty] = useState(false)
   const [toggle2FADirty, setToggle2FADirty] = useState(false)
 
@@ -183,12 +186,19 @@ export default function Home() {
 
   const handleSave3 = () => {
     if (card3MobileId) {
-      // Show push dialog if Mobile ID has a value
+      const isDuplicate = sampleNumbers.some(e => e.mobileId === card3MobileId)
+      if (isDuplicate) {
+        setCard3MobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
+        showSnackbar('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
+        return
+      }
+      setCard3MobileIdError('')
       setPushTimer(30)
       setShowPushDialog(true)
     } else {
       setCard3Dirty(false)
       setToggle2FADirty(false)
+      setCard3MobileIdError('')
       showSnackbar('Изменения сохранены')
     }
   }
@@ -299,7 +309,7 @@ export default function Home() {
   const markCard2PhoneDirty = useCallback((val: string) => { setCard2Phone(val); setCard2Dirty(true) }, [])
   const markCard2EmailDirty = useCallback((val: string) => { setCard2Email(val); setCard2Dirty(true) }, [])
   const markCard3EmailDirty = useCallback((val: string) => { setCard3PasswordEmail(val); setCard3Dirty(true) }, [])
-  const markCard3MobileIdDirty = useCallback((val: string) => { setCard3MobileId(val); setCard3Dirty(true) }, [])
+  const markCard3MobileIdDirty = useCallback((val: string) => { setCard3MobileId(val); setCard3Dirty(true); setCard3MobileIdError('') }, [])
   const handleToggle2FA = () => { setToggle2FA(!toggle2FA); setToggle2FADirty(true) }
 
   const card1CanSave = card1Dirty
@@ -310,7 +320,12 @@ export default function Home() {
   const handlePushCancel = () => {
     setShowPushDialog(false)
     showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
-    setCard3MobileId('')
+    if (card3MobileIdBeforeEdit.current) {
+      setCard3MobileId(card3MobileIdBeforeEdit.current)
+      setCard3MobileIdError(`Новый номер не сохранен. Не удалось получить подтверждение пуша. Для входа в личный кабинет используется ${formatPhoneMask(card3MobileIdBeforeEdit.current)}`)
+    } else {
+      setCard3MobileId('')
+    }
     setCard3Dirty(false)
   }
 
@@ -319,9 +334,11 @@ export default function Home() {
   }
 
   const handlePushSimulate = () => {
+    card3MobileIdBeforeEdit.current = card3MobileId
     setShowPushDialog(false)
     setCard3Dirty(false)
     setToggle2FADirty(false)
+    setCard3MobileIdError('')
     showSnackbar('Изменения сохранены')
   }
 
@@ -344,12 +361,18 @@ export default function Home() {
   }
 
   const handleGoToEmployeeEditRights = () => {
-    setEmpMobileIdDisplay('')
+    setEmpMobileIdDisplay(empMobileId || '')
+    setEmpMobileIdError('')
     setCurrentPage('employee-edit-rights')
   }
 
   const handleEmpMobileIdCheck = () => {
     if (empMobileIdDisplay) {
+      if (card3MobileId && card3MobileId === empMobileIdDisplay) {
+        setEmpMobileIdError('Указанный номер телефона уже используется для входа по Mobile ID у другого пользователя Личного кабинета')
+        return
+      }
+      setEmpMobileIdError('')
       setEmpPushTimer(10)
       setShowEmpPushDialog(true)
     }
@@ -358,7 +381,12 @@ export default function Home() {
   const handleEmpPushCancel = () => {
     setShowEmpPushDialog(false)
     showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
-    setEmpMobileIdDisplay('')
+    if (empMobileId) {
+      setEmpMobileIdDisplay(empMobileId)
+      setEmpMobileIdError(`Новый номер не сохранен. Не удалось получить подтверждение пуша. Для входа в личный кабинет используется ${formatPhoneMask(empMobileId)}`)
+    } else {
+      setEmpMobileIdDisplay('')
+    }
   }
 
   const handleEmpPushResend = () => {
@@ -370,6 +398,7 @@ export default function Home() {
     setEmpMobileId(empMobileIdDisplay)
     sampleNumbers[selectedEmployeeIdx].mobileId = empMobileIdDisplay
     setEmpMobileIdFocused(false)
+    setEmpMobileIdError('')
     showSnackbar('Изменения сохранены')
   }
 
@@ -1082,6 +1111,13 @@ export default function Home() {
                       )}
                     </div>
 
+                    {card3MobileIdError && (
+                      <div className="flex items-start gap-2.5 bg-red-50 rounded-lg px-3.5 py-2.5">
+                        <CircleAlert size={16} className="text-red-600 shrink-0 mt-0.5" />
+                        <p className="text-[13px] text-red-600 leading-relaxed">{card3MobileIdError}</p>
+                      </div>
+                    )}
+
                     {/* Toggle 2FA */}
                     <div className="flex items-start gap-3 pt-2">
                       <div
@@ -1403,6 +1439,7 @@ export default function Home() {
                           const digits = e.target.value.replace(/\D/g, '')
                           const raw = digits.length > 0 && (digits[0] === '7' || digits[0] === '8') ? digits.slice(1) : digits
                           setEmpMobileIdDisplay(raw.slice(0, 10))
+                          setEmpMobileIdError('')
                         }}
                         onFocus={() => setEmpMobileIdFocused(true)}
                         onBlur={() => setEmpMobileIdFocused(false)}
@@ -1435,9 +1472,13 @@ export default function Home() {
                       )
                     )}
                   </div>
-                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
-                    На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
-                  </p>
+                  {empMobileIdError ? (
+                    <p className="mt-1.5 text-xs text-red-600 leading-relaxed">{empMobileIdError}</p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                      На указанный номер при авторизации придёт Push-уведомление для подтверждения нужно нажать «Разрешить»
+                    </p>
+                  )}
                 </div>
 
                 {/* Role dropdown */}
