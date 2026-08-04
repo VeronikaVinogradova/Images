@@ -194,7 +194,7 @@ export default function Home() {
         return
       }
       setCard3MobileIdError('')
-      setPushTimer(30)
+      setPushTimer(10)
       setShowPushDialog(true)
     } else {
       setCard3Dirty(false)
@@ -1629,12 +1629,20 @@ export default function Home() {
               ✓ Подтвердить пуш (симуляция)
             </button>
 
-            <div className="mt-6 flex justify-end gap-3">
+            {pushTimer > 0 && (
+              <p className="mt-4 text-xs text-gray-400">Кнопки станут доступны через {pushTimer} сек</p>
+            )}
+            <div className="mt-4 flex justify-end gap-3">
               <button
                 onClick={handlePushCancel}
-                className="border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+                disabled={pushTimer > 0}
+                className={`border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
+                  pushTimer > 0
+                    ? 'opacity-40 cursor-not-allowed'
+                    : 'cursor-pointer'
+                }`}
               >
-                Отменить изменения
+                Закрыть
               </button>
               <button
                 onClick={handlePushResend}
@@ -1645,7 +1653,7 @@ export default function Home() {
                     : 'hover:bg-yellow-400 cursor-pointer'
                 }`}
               >
-                Отправить повторно: {pushTimer} сек
+                Отправить повторно
               </button>
             </div>
           </div>
