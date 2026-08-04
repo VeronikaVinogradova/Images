@@ -320,14 +320,11 @@ export default function Home() {
   // ─── Push dialog handlers ──────────────────────
   const handlePushCancel = () => {
     setShowPushDialog(false)
-    showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
     if (card3MobileIdBeforeEdit.current) {
-      setCard3MobileId(card3MobileIdBeforeEdit.current)
       setCard3MobileIdError(`Новый номер не сохранен. Не удалось получить подтверждение пуша. Для входа в личный кабинет используется ${formatPhoneMask(card3MobileIdBeforeEdit.current)}`)
     } else {
-      setCard3MobileId('')
+      showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
     }
-    setCard3Dirty(false)
   }
 
   const handlePushResend = () => {
@@ -393,12 +390,10 @@ export default function Home() {
 
   const handleEmpPushCancel = () => {
     setShowEmpPushDialog(false)
-    showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
     if (empMobileId) {
-      setEmpMobileIdDisplay(empMobileId)
       setEmpMobileIdError(`Новый номер не сохранен. Не удалось получить подтверждение пуша. Для входа в личный кабинет используется ${formatPhoneMask(empMobileId)}`)
     } else {
-      setEmpMobileIdDisplay('')
+      showSnackbar('Новый номер не сохранен. Не удалось получить подтверждение пуша')
     }
   }
 
